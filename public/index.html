@@ -2,39 +2,98 @@
 <html lang="kn">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Kannada Health and Fitness</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600&display=swap">
 <style>
-:root{--bg:#f3f7f4;--card:#fff;--ink:#14211b;--mute:#66776e;--pri:#0f8a5f;--mine:#d6f3e4;--line:#dce6e0}
-@media(prefers-color-scheme:dark){:root{--bg:#0e1411;--card:#16201b;--ink:#e7f0ea;--mute:#8da096;--pri:#2fc08a;--mine:#1a4332;--line:#25322b}}
+:root{--bg:#f0f2f5;--panel:#fff;--hd:#f0f2f5;--ink:#111b21;--mute:#667781;--pri:#00a884;--out:#d9fdd3;--in:#fff;--line:#e9edef;--wall:#efeae2;--blue:#53bdeb}
+@media(prefers-color-scheme:dark){:root{--bg:#0b141a;--panel:#111b21;--hd:#202c33;--ink:#e9edef;--mute:#8696a0;--out:#005c4b;--in:#202c33;--line:#222d34;--wall:#0b141a}}
 *{box-sizing:border-box}[hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px 'Noto Sans Kannada',system-ui,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px 'Noto Sans Kannada',system-ui,sans-serif}
 button,input{font:inherit;color:inherit}
-button{border:0;border-radius:10px;padding:.55rem .9rem;background:var(--pri);color:#fff;cursor:pointer}
-input{border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem;background:var(--card);min-width:0}
-#login{max-width:340px;margin:18vh auto;padding:16px;display:grid;gap:12px;text-align:center}
-.lang,#out{background:none;color:var(--mute)}
+button{border:0;background:none;cursor:pointer;padding:.45rem;border-radius:50%;font-size:1.15rem;line-height:1}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pri)}
+.pb{background:var(--pri);color:#fff;border-radius:22px;padding:.6rem 1.2rem;font-size:1rem}
+input{border:0;border-radius:8px;padding:.6rem .8rem;background:var(--hd);min-width:0}
+#login{max-width:340px;margin:16vh auto;padding:16px;display:grid;gap:12px;text-align:center}
 #gbtn{justify-self:center;min-height:44px}
-#app{display:grid;grid-template-columns:230px 1fr;height:100dvh}
-#side{display:flex;flex-direction:column;gap:4px;padding:8px;overflow:auto;background:var(--card);border-right:1px solid var(--line)}
-#side button{background:none;color:var(--ink);text-align:left}
-#side button.on{background:var(--mine)}
-main{display:flex;flex-direction:column;min-height:0}
-header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line)}
-#log{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:12px;gap:6px}
-#log>button{align-self:center;background:none;color:var(--mute)}
-.m{max-width:80%;padding:.45rem .75rem;border-radius:12px;background:var(--card);align-self:flex-start;white-space:pre-wrap;overflow-wrap:anywhere}
-.m.me{align-self:flex-end;background:var(--mine)}
-.m small{display:block;color:var(--mute)}
-#f{display:flex;gap:8px;padding:10px;background:var(--card);border-top:1px solid var(--line)}
-#msg{flex:1}
-#call,#ring{position:fixed;inset:0;background:#000c;display:grid;place-items:center}
+#login .lang{font-size:1rem;color:var(--mute);border-radius:8px}
+#app{display:grid;grid-template-columns:minmax(300px,30%) 1fr;height:100dvh;max-width:1600px;margin:auto;background:var(--panel)}
+aside,main{display:flex;flex-direction:column;min-height:0;min-width:0}
+aside{border-right:1px solid var(--line)}
+header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--hd);min-height:58px}
+header .sp{flex:1;min-width:0}
+.av{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:600;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+#side-t{padding:8px 12px 0;display:grid;gap:8px}
+#tabs{display:flex;gap:6px}
+#tabs button{border-radius:16px;font-size:.85rem;padding:.35rem .8rem;background:var(--hd);color:var(--mute)}
+#tabs .on{background:var(--out);color:var(--ink)}
+#list{flex:1;overflow-y:auto}
+.row{display:flex;gap:12px;align-items:center;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--line);width:100%;text-align:left;border-radius:0}
+.row:hover,.row.on{background:var(--hd)}
+.row .t{flex:1;min-width:0;display:grid;gap:2px}
+.row .l1,.row .l2{display:flex;justify-content:space-between;gap:8px}
+.row small{color:var(--mute);white-space:nowrap}
+.row .pv{color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9rem}
+.bd{background:var(--pri);color:#fff;border-radius:12px;min-width:20px;padding:0 6px;font-size:.75rem;text-align:center}
+#empty{flex:1;display:grid;place-items:center;text-align:center;color:var(--mute);padding:24px;background:var(--hd)}
+#chat{flex:1;display:flex;flex-direction:column;min-height:0;position:relative}
+#back{display:none}
+#ct{flex:1;min-width:0;display:grid}
+#ct small{color:var(--mute)}
+#ms{width:140px}
+#log{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:12px 8%;gap:3px;background:var(--wall)}
+.more{align-self:center;font-size:.8rem;color:var(--mute);border-radius:10px;background:var(--panel)}
+.day{align-self:center;background:var(--panel);color:var(--mute);font-size:.78rem;padding:3px 10px;border-radius:8px;margin:8px 0}
+.m{position:relative;max-width:min(75%,520px);padding:5px 8px 4px;border-radius:8px;background:var(--in);align-self:flex-start;overflow-wrap:anywhere;white-space:pre-wrap;box-shadow:0 1px .5px #0002}
+.m.me{align-self:flex-end;background:var(--out)}
+.m a{color:var(--blue)}
+.m .im{display:block;max-width:100%;max-height:300px;border-radius:6px;cursor:pointer;margin-bottom:3px}
+.m audio{max-width:240px;display:block}
+.m .doc{display:flex;gap:8px;align-items:center;background:#0001;padding:8px;border-radius:6px;color:inherit}
+.rq{border-left:4px solid var(--pri);background:#0001;border-radius:4px;padding:3px 8px;margin-bottom:3px;display:grid;font-size:.85rem}
+.rq span{color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt{float:right;margin:6px 0 0 10px;font-size:.7rem;color:var(--mute);white-space:nowrap}
+.mt .rd{color:var(--blue)}
+.dd{position:absolute;top:0;right:0;font-size:.8rem;display:none;background:inherit;border-radius:8px;padding:2px 6px}
+.m:hover .dd{display:block}
+@media(hover:none){.dd{display:block;opacity:.6}}
+#rep{display:flex;align-items:center;gap:8px;background:var(--hd);padding:6px 12px;border-left:4px solid var(--pri)}
+#rep div{flex:1;min-width:0;display:grid;font-size:.85rem}
+#rep span{color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tray{background:var(--hd);padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;max-height:190px;overflow-y:auto}
+#tray .it{display:grid;justify-items:center;gap:2px;width:74px;font-size:.75rem;border-radius:10px}
+#tray .it b{font-size:1.5rem;font-weight:400}
+#tray .e{font-size:1.5rem;padding:4px}
+#f{display:flex;gap:6px;align-items:center;padding:8px 10px;background:var(--hd)}
+#msg{flex:1;background:var(--panel);border-radius:22px}
+#snd{background:var(--pri);color:#fff;width:40px;height:40px}
+#rb{display:none;flex:1;align-items:center;gap:10px}
+#rb i{color:#e33;animation:bl 1s infinite}@keyframes bl{50%{opacity:.2}}
+#rb span{flex:1}
+#f.rec>:not(#rb){display:none}#f.rec #rb{display:flex}
+.ov{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:5}
+.box{background:var(--panel);width:min(420px,96vw);max-height:92dvh;border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+#nl{overflow-y:auto;min-height:120px}
+.pvb{padding:12px;display:grid;gap:10px}
+.pvb .x{max-width:100%;max-height:50dvh;margin:auto;border-radius:8px}
+#lb img,#lb video{max-width:96vw;max-height:94dvh}
+#pop{position:fixed;z-index:9;background:var(--panel);border-radius:8px;box-shadow:0 2px 12px #0005;display:grid;min-width:170px;padding:4px 0}
+#pop button{text-align:left;border-radius:0;padding:.55rem 1rem;font-size:.95rem}
+#pop button:hover{background:var(--hd)}
+#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#111b21e6;color:#fff;padding:8px 16px;border-radius:20px;z-index:9}
+#call,#ring{position:fixed;inset:0;background:#000d;display:grid;place-items:center;z-index:8;color:#fff}
 #theirs{width:100%;height:100%;object-fit:cover;background:#000}
 #mine{position:absolute;right:12px;top:12px;width:30%;max-width:160px;border-radius:12px}
-#end{position:absolute;bottom:24px;background:#d33}
-#ring div{background:var(--card);padding:20px;border-radius:14px;display:grid;gap:12px;text-align:center}
-@media(max-width:700px){#app{grid-template-columns:1fr;grid-template-rows:auto 1fr}#side{flex-direction:row;border-right:0;border-bottom:1px solid var(--line)}#side button{white-space:nowrap}}
+#cn2{position:absolute;top:16px;left:16px;font-size:1.1rem;text-shadow:0 1px 4px #000}
+#cc{position:absolute;bottom:24px;display:flex;gap:16px}
+#cc button{width:56px;height:56px;background:#fff3}
+#end{background:#d33!important}
+.aud #theirs,.aud #mine{opacity:0;position:absolute;width:1px;height:1px;pointer-events:none}
+.aud #cn2{position:static;font-size:1.6rem}
+#ring div{background:var(--panel);color:var(--ink);padding:20px;border-radius:14px;display:grid;gap:12px;text-align:center}
+@media(max-width:700px){#app{grid-template-columns:1fr}#app:not(.open) main,#app.open aside{display:none}#back{display:block}#log{padding:12px 10px}.m{max-width:86%}#ms{width:90px}}
 </style>
 </head>
 <body>
@@ -44,87 +103,202 @@ header{display:flex;gap:8px;align-items:center;justify-content:space-between;pad
   <p id="gerr" hidden>Google sign-in is not set up: set GOOGLE_CLIENT_ID on the server.</p>
   <button type="button" class="lang">ಕನ್ನಡ | English</button>
 </div>
+
 <div id="app" hidden>
-  <nav id="side"></nav>
+  <aside>
+    <header><span id="myav"></span><b class="sp" id="myn"></b>
+      <button id="nc" data-t="newchat" data-ti>➕</button><button class="lang" title="ಕನ್ನಡ | English">🌐</button><button id="out" data-ti data-t="out">⏻</button></header>
+    <div id="side-t"><input id="q" type="search"><div id="tabs"><button class="on" data-f="all" data-t="all"></button><button data-f="unread" data-t="unread"></button></div></div>
+    <div id="list"></div>
+  </aside>
   <main>
-    <header><b id="head"></b><span><button id="vc" data-t="call" hidden></button> <button type="button" class="lang">ಕನ್ನಡ | EN</button> <button id="out" data-t="out"></button></span></header>
-    <div id="log"></div>
-    <form id="f"><input id="msg" autocomplete="off"><button data-t="send"></button></form>
+    <div id="empty"><div><div style="font-size:3rem">💬</div><p data-t="pick"></p><button class="pb" id="nc2" data-t="newchat"></button></div></div>
+    <section id="chat" hidden>
+      <header><button id="back">←</button><span id="cav"></span><div id="ct"><b id="cn"></b><small id="cs"></small></div>
+        <input id="ms" type="search" hidden><button id="sb">🔍</button><button id="ac" data-ti data-t="acall">📞</button><button id="vc" data-ti data-t="call">🎥</button></header>
+      <div id="log"></div>
+      <div id="rep" hidden><div><b id="rn"></b><span id="rt"></span></div><button id="rx">✕</button></div>
+      <div id="tray" hidden></div>
+      <form id="f">
+        <button type="button" id="emo">😊</button><button type="button" id="att">📎</button>
+        <input id="msg" autocomplete="off"><button id="snd">🎤</button>
+        <div id="rb"><button type="button" id="rc">🗑</button><i>●</i><span id="rtm">0:00</span><button type="button" id="rs" class="pb">➤</button></div>
+      </form>
+    </section>
   </main>
 </div>
-<div id="call" hidden><video id="theirs" autoplay playsinline></video><video id="mine" autoplay playsinline muted></video><button id="end" data-t="end"></button></div>
-<div id="ring" hidden><div><p id="who"></p><button id="yes" data-t="accept"></button><button id="no" data-t="decline"></button></div></div>
+
+<div id="nm" class="ov" hidden><div class="box"><header><button id="nx">←</button><b data-t="newchat"></b></header>
+  <div style="padding:8px 12px"><input id="ns" type="search" style="width:100%"></div><div id="nl"></div></div></div>
+<div id="pv" class="ov" hidden><div class="box"><div class="pvb"><div id="pvm"></div><input id="cap"><div style="display:flex;justify-content:space-between"><button id="pc">✕</button><button id="ps" class="pb">➤</button></div></div></div></div>
+<div id="lb" class="ov" hidden></div>
+<div id="pop" hidden></div>
+<div id="toast" hidden></div>
+<input type="file" id="fi" multiple hidden>
+
+<div id="call" hidden><div id="cn2"></div><video id="theirs" autoplay playsinline></video><video id="mine" autoplay playsinline muted></video>
+  <div id="cc"><button id="mu">🎤</button><button id="cm">📷</button><button id="end">📞</button></div></div>
+<div id="ring" hidden><div><p id="who"></p><button class="pb" id="yes" data-t="accept"></button><button id="no" data-t="decline"></button></div></div>
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const T = {
-  kn: { title:'ಕನ್ನಡ ಆರೋಗ್ಯ ಮತ್ತು ಫಿಟ್ನೆಸ್', name:'ನಿಮ್ಮ ಹೆಸರು', join:'ಸೇರಿ', msg:'ಸಂದೇಶ ಬರೆಯಿರಿ', send:'ಕಳುಹಿಸಿ', older:'ಹಳೆಯ ಸಂದೇಶಗಳು', call:'ವೀಡಿಯೊ ಕರೆ', end:'ಕರೆ ಮುಗಿಸಿ', accept:'ಸ್ವೀಕರಿಸಿ', decline:'ತಿರಸ್ಕರಿಸಿ', incoming:'ಕರೆ ಬರುತ್ತಿದೆ', pick:'ಒಂದು ಚಾಟ್ ಆರಿಸಿ', err:'ಸೈನ್ ಇನ್ ವಿಫಲವಾಗಿದೆ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ', out:'ಸೈನ್ ಔಟ್', yoga:'ಯೋಗ', diet:'ಆಹಾರ ಕ್ರಮ', 'weight-loss':'ತೂಕ ಇಳಿಕೆ', general:'ಸಾಮಾನ್ಯ' },
-  en: { title:'Kannada Health and Fitness', name:'Your name', join:'Join', msg:'Type a message', send:'Send', older:'Older messages', call:'Video call', end:'End call', accept:'Accept', decline:'Decline', incoming:'is calling', pick:'Pick a chat', err:'Sign-in failed. Please try again', out:'Sign out', yoga:'Yoga', diet:'Diet', 'weight-loss':'Weight loss', general:'General' }
+  kn: { title:'ಕನ್ನಡ ಆರೋಗ್ಯ ಮತ್ತು ಫಿಟ್ನೆಸ್', msg:'ಸಂದೇಶ ಬರೆಯಿರಿ', search:'ಹುಡುಕಿ', all:'ಎಲ್ಲಾ', unread:'ಓದದಿರುವುದು', newchat:'ಹೊಸ ಚಾಟ್', call:'ವೀಡಿಯೊ ಕರೆ', acall:'ಧ್ವನಿ ಕರೆ', end:'ಕರೆ ಮುಗಿಸಿ', accept:'ಸ್ವೀಕರಿಸಿ', decline:'ತಿರಸ್ಕರಿಸಿ', incoming:'ಕರೆ ಬರುತ್ತಿದೆ', pick:'ಚಾಟ್ ಆರಿಸಿ ಅಥವಾ ಹೊಸ ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ', err:'ಸೈನ್ ಇನ್ ವಿಫಲವಾಗಿದೆ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ', out:'ಸೈನ್ ಔಟ್', older:'ಹಳೆಯ ಸಂದೇಶಗಳು', online:'ಆನ್‌ಲೈನ್', offline:'ಆಫ್‌ಲೈನ್', typing:'ಟೈಪ್ ಮಾಡುತ್ತಿದ್ದಾರೆ…', photo:'ಫೋಟೋ ಮತ್ತು ವೀಡಿಯೊ', camera:'ಕ್ಯಾಮೆರಾ', doc:'ಡಾಕ್ಯುಮೆಂಟ್', audio:'ಆಡಿಯೋ', loc:'ಸ್ಥಳ', reply:'ಉತ್ತರಿಸಿ', copy:'ನಕಲಿಸಿ', star:'ನಕ್ಷತ್ರ ಹಾಕಿ', delme:'ನನಗೆ ಮಾತ್ರ ಅಳಿಸಿ', delall:'ಎಲ್ಲರಿಗೂ ಅಳಿಸಿ', deleted:'ಈ ಸಂದೇಶ ಅಳಿಸಲಾಗಿದೆ', email:'Google ಇಮೇಲ್ ಅಥವಾ ಹೆಸರು', start:'ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ', nf:'ಈ Google ಖಾತೆ ಸಿಗಲಿಲ್ಲ', big:'ಫೈಲ್ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ (15 MB ವರೆಗೆ)', mic:'ಮೈಕ್ರೋಫೋನ್ ಲಭ್ಯವಿಲ್ಲ', today:'ಇಂದು', yday:'ನಿನ್ನೆ', caption:'ಶೀರ್ಷಿಕೆ ಸೇರಿಸಿ', voice:'ಧ್ವನಿ ಸಂದೇಶ' },
+  en: { title:'Kannada Health and Fitness', msg:'Type a message', search:'Search', all:'All', unread:'Unread', newchat:'New chat', call:'Video call', acall:'Voice call', end:'End call', accept:'Accept', decline:'Decline', incoming:'is calling', pick:'Pick a chat or start a new one', err:'Sign-in failed. Please try again', out:'Sign out', older:'Older messages', online:'online', offline:'offline', typing:'typing…', photo:'Photos & videos', camera:'Camera', doc:'Document', audio:'Audio', loc:'Location', reply:'Reply', copy:'Copy', star:'Star', delme:'Delete for me', delall:'Delete for everyone', deleted:'This message was deleted', email:'Google email or name', start:'Start chat with', nf:'No chat account found for that email', big:'File too large (max 15 MB)', mic:'Microphone unavailable', today:'Today', yday:'Yesterday', caption:'Add a caption', voice:'Voice message' }
 };
 const $ = (s) => document.querySelector(s);
-const el = (tag, text) => Object.assign(document.createElement(tag), { textContent: text });
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const socket = io();
-let lang = 'kn', me = null, chat = null, groups = [], users = [];
-const store = {}, names = {}, unread = new Set();
-const t = (k) => T[lang][k] || k;
-const nameOf = (id) => names[id] || '';
+const MAX = 15 * 1024 * 1024;
+let lang = localStorage.lang || 'kn', me = null, chat = null, users = [], contacts = [], reply = null, q = '', filter = 'all', queue = [];
+const store = {}, info = {}, unread = {}, lastSeen = {}, typingAt = {};
+const load = (k, d) => { try { return JSON.parse(localStorage[k]) || d; } catch (e) { return d; } };
+const save = (k, v) => { try { localStorage[k] = JSON.stringify(v); } catch (e) {} };
+const starred = new Set(load('stars', [])), hidden = new Set(load('hid', []));
+const t = (k) => T[lang][k] || T.en[k] || k;
+const nameOf = (id) => (info[id] && info[id].name) || '';
 const dm = (a, b) => 'dm:' + [a, b].sort().join('|');
-const key = (c) => (c.startsWith('group:') ? c : dm(me, c.slice(5)));
-
-function draw() {
-  const log = $('#log'); log.innerHTML = '';
-  if (!chat) { log.textContent = t('pick'); return; }
-  const list = store[key(chat)] || [];
-  const more = el('button', t('older'));
-  more.onclick = () => socket.emit('history', { to: chat, before: list[0] && list[0].ts }, (old) => { store[key(chat)] = [...old, ...list]; draw(); });
-  log.append(more);
-  list.forEach((m) => {
-    const d = el('div', ''); d.className = 'm' + (m.from === me ? ' me' : '');
-    d.append(el('small', m.name || ''), m.text);
-    log.append(d);
-  });
-  log.scrollTop = log.scrollHeight;
+const mid = (m) => m.id || m.ts + '-' + m.from;
+const fmt = (ts) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const size = (n) => (n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB');
+const dayLabel = (ts) => { const d = new Date(ts), n = new Date(); return d.toDateString() === n.toDateString() ? t('today') : d.toDateString() === new Date(n - 864e5).toDateString() ? t('yday') : d.toLocaleDateString(); };
+const toast = (s) => { const x = $('#toast'); x.textContent = s; x.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (x.hidden = true), 2600); };
+const preview = (m) => m.deleted ? t('deleted') : m.file ? (m.file.type.startsWith('image/') ? '🖼 ' : m.file.type.startsWith('video/') ? '🎥 ' : m.file.type.startsWith('audio/') ? '🎤 ' : '📄 ') + (m.text || m.file.name) : m.text || '';
+const peerOf = (m) => m.convo.slice(3).split('|').find((x) => x !== me) || m.from;
+const linkify = (s) => { const f = document.createDocumentFragment(); s.split(/(https?:\/\/\S+)/g).forEach((p, i) => { if (i % 2) { const a = el('a', '', p); a.href = p; a.target = '_blank'; a.rel = 'noopener'; f.append(a); } else f.append(p); }); return f; };
+function av(u) {
+  const d = el('div', 'av');
+  if (u && u.picture) { const i = el('img'); i.src = u.picture; i.referrerPolicy = 'no-referrer'; d.append(i); }
+  else { d.textContent = ((u && u.name) || '?')[0].toUpperCase(); d.style.background = 'hsl(' + ([...((u && u.id) || '')].reduce((a, c) => a + c.charCodeAt(0), 0) * 37 % 360) + ' 45% 42%)'; }
+  return d;
 }
-function render() {
+function addContact(u) {
+  info[u.id] = Object.assign(info[u.id] || {}, u);
+  let c = contacts.find((x) => x.id === u.id);
+  if (!c) contacts.push((c = { id: u.id }));
+  Object.assign(c, { name: u.name || c.name, email: u.email || c.email, picture: u.picture || c.picture });
+  save('c:' + me, contacts);
+  return c;
+}
+
+/* ---------- text / labels ---------- */
+function labels() {
   document.documentElement.lang = lang;
-  document.querySelectorAll('[data-t]').forEach((e) => (e.textContent = t(e.dataset.t)));
-  $('#msg').placeholder = t('msg');
-  const side = $('#side'); side.innerHTML = '';
-  const chip = (id, label) => {
-    const b = el('button', label + (unread.has(id) ? ' •' : ''));
-    if (id === chat) b.className = 'on';
-    b.onclick = () => openChat(id);
-    side.append(b);
-  };
-  groups.forEach((g) => chip('group:' + g, '# ' + t(g)));
-  users.filter((u) => u.id !== me).forEach((u) => chip('user:' + u.id, '🟢 ' + u.name));
-  const isDm = chat && chat.startsWith('user:');
-  $('#head').textContent = !chat ? t('title') : isDm ? nameOf(chat.slice(5)) : '# ' + t(chat.slice(6));
-  $('#vc').hidden = !isDm;
-  draw();
+  document.querySelectorAll('[data-t]').forEach((e) => (e.hasAttribute('data-ti') ? (e.title = t(e.dataset.t)) : (e.textContent = t(e.dataset.t))));
+  $('#msg').placeholder = t('msg'); $('#q').placeholder = t('search'); $('#ms').placeholder = t('search');
+  $('#ns').placeholder = t('email'); $('#cap').placeholder = t('caption');
+}
+
+/* ---------- chat list ---------- */
+function drawList() {
+  const L = $('#list'); L.innerHTML = '';
+  const s = $('#q').value.toLowerCase();
+  const rows = contacts.filter((c) => (c.name || '').toLowerCase().includes(s) && (filter === 'all' || unread[c.id]))
+    .sort((a, b) => (b.lt || 0) - (a.lt || 0));
+  rows.forEach((c) => {
+    const b = el('button', 'row' + (c.id === chat ? ' on' : ''));
+    const l1 = el('div', 'l1'), l2 = el('div', 'l2');
+    l1.append(el('b', '', c.name || c.email), el('small', '', c.lt ? (new Date(c.lt).toDateString() === new Date().toDateString() ? fmt(c.lt) : dayLabel(c.lt)) : ''));
+    l2.append(el('span', 'pv', users.some((u) => u.id === c.id) && !c.lp ? '🟢 ' + t('online') : c.lp || ''));
+    if (unread[c.id]) l2.append(el('span', 'bd', unread[c.id]));
+    const tx = el('div', 't'); tx.append(l1, l2);
+    b.append(av(info[c.id] || c), tx);
+    b.onclick = () => openChat(c.id);
+    L.append(b);
+  });
+}
+function drawHead() {
+  const u = info[me] || {};
+  $('#myav').replaceChildren(av(u)); $('#myn').textContent = u.name || '';
+  if (!chat) return;
+  $('#cav').replaceChildren(av(info[chat] || { id: chat }));
+  $('#cn').textContent = nameOf(chat);
+  $('#cs').textContent = Date.now() - (typingAt[chat] || 0) < 3000 ? t('typing') : users.some((x) => x.id === chat) ? t('online') : lastSeen[chat] ? t('offline') + ' · ' + fmt(lastSeen[chat]) : t('offline');
+}
+function tick(m) { const s = m.status || 'sent'; const x = el('span', s === 'read' ? 'rd' : '', s === 'sent' ? ' ✓' : ' ✓✓'); return x; }
+function fileEl(f) {
+  const ty = f.type || '';
+  if (ty.startsWith('image/')) { const i = el('img', 'im'); i.src = f.data; i.alt = f.name; i.onclick = () => lightbox(f); return i; }
+  if (ty.startsWith('video/')) { const v = el('video', 'im'); v.src = f.data; v.controls = true; v.preload = 'metadata'; v.playsInline = true; return v; }
+  if (ty.startsWith('audio/')) { const a = el('audio'); a.src = f.data; a.controls = true; return a; }
+  const a = el('a', 'doc'); a.href = f.data; a.download = f.name; a.append(el('span', '', '📄'), el('span', '', f.name + ' · ' + size(f.size))); return a;
+}
+function bubble(m) {
+  const own = m.from === me, b = el('div', 'm' + (own ? ' me' : ''));
+  if (m.replyTo) { const r = el('div', 'rq'); r.append(el('b', '', m.replyTo.name), el('span', '', m.replyTo.text)); b.append(r); }
+  if (m.deleted) b.append(el('i', '', '🚫 ' + t('deleted')));
+  else { if (m.file) b.append(fileEl(m.file)); if (m.text) b.append(linkify(m.text)); }
+  const mt = el('span', 'mt', (starred.has(mid(m)) ? '★ ' : '') + fmt(m.ts)); if (own && !m.deleted) mt.append(tick(m));
+  b.append(mt);
+  const dd = el('button', 'dd', '▾'); dd.onclick = (e) => { e.stopPropagation(); msgMenu(m, e.clientX, e.clientY); }; b.append(dd);
+  b.oncontextmenu = (e) => { e.preventDefault(); msgMenu(m, e.clientX, e.clientY); };
+  return b;
+}
+function drawLog(force) {
+  if (!chat) return;
+  const log = $('#log'), k = dm(me, chat), all = store[k] || [];
+  const nb = force || log.scrollHeight - log.scrollTop - log.clientHeight < 100;
+  log.innerHTML = '';
+  const more = el('button', 'more', t('older'));
+  more.onclick = () => socket.emit('history', { to: 'user:' + chat, before: all[0] && all[0].ts }, (old) => { store[k] = [...old, ...all]; drawLog(); });
+  log.append(more);
+  let day = '';
+  all.filter((m) => !hidden.has(mid(m)) && (!q || (m.text || '').toLowerCase().includes(q))).forEach((m) => {
+    const d = new Date(m.ts).toDateString();
+    if (d !== day) { day = d; log.append(el('div', 'day', dayLabel(m.ts))); }
+    log.append(bubble(m));
+  });
+  if (nb) log.scrollTop = log.scrollHeight;
 }
 function openChat(id) {
-  chat = id; unread.delete(id);
-  socket.emit('history', { to: id }, (list) => { store[key(id)] = list; render(); });
-  render();
+  chat = id; unread[id] = 0; q = ''; $('#ms').value = ''; $('#ms').hidden = true; reply = null; drawReply(); tray();
+  $('#app').classList.add('open'); $('#empty').hidden = true; $('#chat').hidden = false;
+  drawHead(); drawList(); drawLog(true);
+  socket.emit('history', { to: 'user:' + id }, (list) => { store[dm(me, id)] = list || []; drawLog(true); markRead(); });
 }
+const markRead = () => chat && socket.emit('read', { to: 'user:' + chat });
 
+/* ---------- sockets ---------- */
 socket.on('message', (m) => {
-  const isOpen = chat && key(chat) === m.convo;
-  if (isOpen) (store[m.convo] = store[m.convo] || []).push(m);
-  else if (m.from !== me) unread.add(m.convo.startsWith('group:') ? m.convo : 'user:' + m.from);
-  render();
+  const peer = peerOf(m), k = m.convo;
+  const c = addContact(info[peer] || { id: peer, name: m.from === me ? '' : m.name });
+  c.lt = m.ts; c.lp = (m.from === me ? '' : '') + preview(m); save('c:' + me, contacts);
+  const open = chat === peer;
+  (store[k] = store[k] || []).push(m);
+  if (open) { drawLog(m.from === me); if (m.from !== me) markRead(); }
+  else if (m.from !== me) { unread[peer] = (unread[peer] || 0) + 1; }
+  if (m.from !== me && (document.hidden || !open) && window.Notification && Notification.permission === 'granted') new Notification(m.name || nameOf(peer), { body: preview(m) });
+  drawList();
 });
-socket.on('online', (l) => { users = l; l.forEach((u) => (names[u.id] = u.name)); if (me) render(); });
+socket.on('online', (l) => {
+  users.forEach((u) => { if (!l.some((x) => x.id === u.id)) lastSeen[u.id] = Date.now(); });
+  users = l;
+  l.forEach((u) => { info[u.id] = Object.assign(info[u.id] || {}, u); if (contacts.some((c) => c.id === u.id)) addContact(u); });
+  if (me) { drawHead(); drawList(); }
+});
+socket.on('typing', ({ from }) => { typingAt[from] = Date.now(); drawHead(); setTimeout(drawHead, 3100); });
+socket.on('status', ({ convo, status }) => {
+  const rank = { sent: 0, delivered: 1, read: 2 };
+  (store[convo] || []).forEach((m) => { if (m.from === me && rank[status] > rank[m.status || 'sent']) m.status = status; });
+  if (chat && dm(me, chat) === convo) drawLog();
+});
+socket.on('deleted', ({ convo, id }) => {
+  (store[convo] || []).forEach((m) => { if (mid(m) === id) { m.deleted = true; delete m.file; m.text = ''; } });
+  if (chat && dm(me, chat) === convo) drawLog();
+});
 socket.on('connect', () => { if (me) socket.emit('join', { session: localStorage.getItem('sess') }, (r) => { if (r.error) location.reload(); }); });
-socket.on('disconnect', (why) => { if (why === 'io server disconnect') { me = null; $('#app').hidden = true; $('#login').hidden = false; } }); // signed in somewhere else
+socket.on('disconnect', (why) => { if (why === 'io server disconnect') { me = null; $('#app').hidden = true; $('#login').hidden = false; } });
 
 function signIn(auth) {
   socket.connect();
   socket.emit('join', auth, (r) => {
     if (r.error) { localStorage.removeItem('sess'); if (auth.credential) alert(t('err')); return; }
-    me = r.id; groups = r.groups; localStorage.setItem('sess', r.session);
+    me = r.id; localStorage.setItem('sess', r.session);
+    info[me] = Object.assign(info[me] || {}, r.user || { id: me, name: r.name });
+    contacts = load('c:' + me, []); contacts.forEach((c) => (info[c.id] = Object.assign(c, info[c.id] || {})));
     $('#login').hidden = true; $('#app').hidden = false;
-    render();
+    if (window.Notification && Notification.permission === 'default') Notification.requestPermission();
+    drawHead(); drawList();
   });
 }
 if (localStorage.getItem('sess')) signIn({ session: localStorage.getItem('sess') });
@@ -139,73 +313,170 @@ fetch('/config.json').then((r) => r.json()).then(({ clientId }) => {
   document.head.append(s);
 });
 $('#out').onclick = () => { localStorage.removeItem('sess'); if (window.google) google.accounts.id.disableAutoSelect(); location.reload(); };
-document.querySelectorAll('.lang').forEach((b) => (b.onclick = () => { lang = lang === 'kn' ? 'en' : 'kn'; render(); }));
+document.querySelectorAll('.lang').forEach((b) => (b.onclick = () => { lang = lang === 'kn' ? 'en' : 'kn'; localStorage.lang = lang; labels(); drawHead(); drawList(); drawLog(); }));
+$('#back').onclick = () => { chat = null; $('#app').classList.remove('open'); $('#chat').hidden = true; $('#empty').hidden = false; drawList(); };
+$('#q').oninput = drawList;
+document.querySelectorAll('#tabs button').forEach((b) => (b.onclick = () => { filter = b.dataset.f; document.querySelectorAll('#tabs button').forEach((x) => x.classList.toggle('on', x === b)); drawList(); }));
+$('#sb').onclick = () => { const i = $('#ms'); i.hidden = !i.hidden; if (i.hidden) { i.value = ''; q = ''; drawLog(); } else i.focus(); };
+$('#ms').oninput = (e) => { q = e.target.value.toLowerCase(); drawLog(); };
+
+/* ---------- new chat with a Google account ---------- */
+function drawNew() {
+  const s = $('#ns').value.trim(), L = $('#nl'); L.innerHTML = '';
+  const row = (u, sub, fn) => { const b = el('button', 'row'); const tx = el('div', 't'); tx.append(el('b', '', u.name || sub), el('span', 'pv', sub)); b.append(av(u), tx); b.onclick = fn; L.append(b); };
+  if (/^\S+@\S+\.\S+$/.test(s)) row({ name: '🔍' }, t('start') + ' ' + s, () => socket.emit('find', { email: s }, (r) => { if (r && r.user) startChat(r.user); else toast(t('nf')); }));
+  const low = s.toLowerCase();
+  users.filter((u) => u.id !== me && ((u.name || '') + (u.email || '')).toLowerCase().includes(low)).forEach((u) => row(u, u.email || '🟢 ' + t('online'), () => startChat(u)));
+  contacts.filter((c) => !users.some((u) => u.id === c.id) && (c.name || '').toLowerCase().includes(low)).forEach((c) => row(c, c.email || '', () => startChat(c)));
+}
+function startChat(u) { addContact(u); $('#nm').hidden = true; openChat(u.id); }
+$('#nc').onclick = $('#nc2').onclick = () => { $('#nm').hidden = false; $('#ns').value = ''; drawNew(); $('#ns').focus(); };
+$('#ns').oninput = drawNew; $('#nx').onclick = () => ($('#nm').hidden = true);
+
+/* ---------- sending ---------- */
+function send(extra) {
+  if (!chat) return;
+  const p = Object.assign({ to: 'user:' + chat, id: (crypto.randomUUID && crypto.randomUUID()) || Date.now() + '' + Math.random() }, extra);
+  if (reply) { p.replyTo = reply; reply = null; drawReply(); }
+  socket.emit('send', p);
+}
+function toData(file, cb) {
+  if (file.size > MAX) return toast(t('big'));
+  const r = new FileReader();
+  r.onload = () => cb({ name: file.name || 'file', type: file.type || 'application/octet-stream', size: file.size, data: r.result });
+  r.readAsDataURL(file);
+}
 $('#f').onsubmit = (e) => {
   e.preventDefault();
   const text = $('#msg').value.trim();
-  if (text && chat) { socket.emit('send', { to: chat, text }); $('#msg').value = ''; }
+  if (text) { send({ text }); $('#msg').value = ''; $('#snd').textContent = '🎤'; tray(); } else recStart();
 };
+let lastTyping = 0;
+$('#msg').oninput = (e) => { $('#snd').textContent = e.target.value.trim() ? '➤' : '🎤'; if (chat && Date.now() - lastTyping > 2000) { lastTyping = Date.now(); socket.emit('typing', { to: 'user:' + chat }); } };
+function drawReply() { $('#rep').hidden = !reply; if (reply) { $('#rn').textContent = reply.name; $('#rt').textContent = reply.text; } }
+$('#rx').onclick = () => { reply = null; drawReply(); };
 
-// ---- Video calls (WebRTC). Add a TURN server below for strict networks. ----
+/* emoji + attachment tray */
+const EMO = '😀😁😂🤣😊😍😘😎🤔😢😭😡👍👎👏🙏💪🔥❤️💔🎉🎂🌹☀️🌙⭐🍎🍕☕🏃🧘🥗💧😴🤗😉😋🙌👋✌️🤝👀🎶'.match(/\p{Extended_Pictographic}\uFE0F?/gu);
+const ATT = [['🖼', 'photo', 'image/*,video/*'], ['📷', 'camera', 'image/*', 'environment'], ['📄', 'doc', '*/*'], ['🎵', 'audio', 'audio/*'], ['📍', 'loc']];
+let trayKind = '';
+function tray(kind) {
+  const tr = $('#tray'); trayKind = kind && kind !== trayKind ? kind : ''; tr.innerHTML = ''; tr.hidden = !trayKind;
+  if (trayKind === 'emo') EMO.forEach((e) => { const b = el('button', 'e', e); b.type = 'button'; b.onclick = () => { const i = $('#msg'); i.value += e; i.focus(); i.oninput({ target: i }); }; tr.append(b); });
+  if (trayKind === 'att') ATT.forEach(([ic, k, acc, cap]) => {
+    const b = el('button', 'it'); b.type = 'button'; b.append(el('b', '', ic), el('span', '', t(k)));
+    b.onclick = () => { tray(); if (k === 'loc') return sendLoc(); const fi = $('#fi'); fi.accept = acc; cap ? fi.setAttribute('capture', cap) : fi.removeAttribute('capture'); fi.click(); };
+    tr.append(b);
+  });
+}
+$('#emo').onclick = () => tray('emo'); $('#att').onclick = () => tray('att');
+function sendLoc() {
+  navigator.geolocation.getCurrentPosition((p) => { const { latitude: a, longitude: o } = p.coords; send({ text: '📍 https://www.openstreetmap.org/?mlat=' + a + '&mlon=' + o + '#map=16/' + a + '/' + o }); }, (e) => toast(e.message));
+}
+$('#fi').onchange = (e) => { addFiles(e.target.files); e.target.value = ''; };
+function addFiles(list) { queue = [...list]; showPv(); }
+function showPv() {
+  const f = queue[0], pv = $('#pv'); if (!f) { pv.hidden = true; return; }
+  const ty = f.type, m = $('#pvm'), u = URL.createObjectURL(f); m.innerHTML = '';
+  if (ty.startsWith('image/')) { const i = el('img', 'x'); i.src = u; m.append(i); }
+  else if (ty.startsWith('video/')) { const v = el('video', 'x'); v.src = u; v.controls = true; m.append(v); }
+  else m.append(el('div', '', '📄 ' + f.name + ' · ' + size(f.size)));
+  $('#cap').value = ''; pv.hidden = false;
+}
+$('#ps').onclick = () => { const f = queue.shift(), cap = $('#cap').value.trim(); toData(f, (d) => send({ file: d, text: cap })); showPv(); };
+$('#pc').onclick = () => { queue = []; showPv(); };
+$('#chat').ondragover = (e) => e.preventDefault();
+$('#chat').ondrop = (e) => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files); };
+$('#msg').onpaste = (e) => { const f = [...e.clipboardData.files]; if (f.length) { e.preventDefault(); addFiles(f); } };
+
+/* voice notes */
+let rec, chunks, rtimer, rcancel;
+async function recStart() {
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+    rec = new MediaRecorder(s); chunks = []; rcancel = false;
+    rec.ondataavailable = (e) => chunks.push(e.data);
+    rec.onstop = () => {
+      s.getTracks().forEach((x) => x.stop()); clearInterval(rtimer); $('#f').classList.remove('rec');
+      if (rcancel) return;
+      const ty = rec.mimeType.split(';')[0], b = new File(chunks, 'voice-' + Date.now() + (ty.includes('mp4') ? '.m4a' : '.webm'), { type: ty });
+      toData(b, (d) => send({ file: d }));
+    };
+    rec.start(); const t0 = Date.now(); $('#f').classList.add('rec');
+    rtimer = setInterval(() => { const s2 = Math.floor((Date.now() - t0) / 1000); $('#rtm').textContent = Math.floor(s2 / 60) + ':' + String(s2 % 60).padStart(2, '0'); }, 500);
+  } catch (e) { toast(t('mic')); }
+}
+$('#rs').onclick = () => rec && rec.stop();
+$('#rc').onclick = () => { rcancel = true; rec && rec.stop(); };
+
+/* message menu + lightbox */
+function msgMenu(m, x, y) {
+  const id = mid(m), items = [[t('reply'), () => { reply = { id, name: m.name || nameOf(m.from), text: preview(m) }; drawReply(); $('#msg').focus(); }]];
+  if (m.text) items.push([t('copy'), () => navigator.clipboard && navigator.clipboard.writeText(m.text)]);
+  items.push([t('star'), () => { starred.has(id) ? starred.delete(id) : starred.add(id); save('stars', [...starred]); drawLog(); }]);
+  items.push([t('delme'), () => { hidden.add(id); save('hid', [...hidden]); drawLog(); }]);
+  if (m.from === me && !m.deleted) items.push([t('delall'), () => socket.emit('delete', { to: 'user:' + chat, id })]);
+  const p = $('#pop'); p.innerHTML = '';
+  items.forEach(([l, f]) => { const b = el('button', '', l); b.onclick = f; p.append(b); });
+  p.hidden = false; p.style.left = Math.max(4, Math.min(x, innerWidth - 190)) + 'px'; p.style.top = Math.min(y, innerHeight - items.length * 40 - 10) + 'px';
+}
+document.addEventListener('click', () => ($('#pop').hidden = true), true);
+function lightbox(f) { const l = $('#lb'); l.innerHTML = ''; const i = el('img'); i.src = f.data; l.append(i); l.hidden = false; }
+$('#lb').onclick = () => ($('#lb').hidden = true);
+
+/* ---------- Calls (WebRTC): voice + video. Add a TURN server for strict networks. ---------- */
 const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-let pc, local, peer, offer, queue = [];
+let pc, local, peer, offer, queue2 = [], wantVideo = true;
 const sig = (data) => socket.emit('call', { to: peer, data });
-
-async function media() {
-  local = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+async function media(v) {
+  local = await navigator.mediaDevices.getUserMedia({ video: v, audio: true });
   $('#mine').srcObject = local;
   pc = new RTCPeerConnection(ICE);
   local.getTracks().forEach((tr) => pc.addTrack(tr, local));
   pc.ontrack = (e) => ($('#theirs').srcObject = e.streams[0]);
   pc.onicecandidate = (e) => e.candidate && sig({ type: 'ice', candidate: e.candidate.toJSON() });
-  $('#call').hidden = false;
+  $('#call').classList.toggle('aud', !v); $('#cm').hidden = !v; $('#cn2').textContent = nameOf(peer);
+  $('#mu').textContent = '🎤'; $('#cm').textContent = '📷'; $('#call').hidden = false;
 }
 function hangup(notify) {
   if (notify && peer) sig({ type: 'end' });
   if (pc) pc.close();
   if (local) local.getTracks().forEach((tr) => tr.stop());
-  pc = local = peer = offer = null; queue = [];
+  pc = local = peer = offer = null; queue2 = [];
   $('#call').hidden = true; $('#ring').hidden = true;
 }
-$('#vc').onclick = async () => {
-  if (peer || !chat || !chat.startsWith('user:')) return;
-  peer = chat.slice(5);
-  try {
-    await media();
-    const o = await pc.createOffer();
-    await pc.setLocalDescription(o);
-    sig({ type: 'offer', sdp: o });
-  } catch (err) { alert('Camera / microphone: ' + err.message); hangup(true); }
-};
+async function startCall(v) {
+  if (peer || !chat) return;
+  peer = chat;
+  try { await media(v); const o = await pc.createOffer(); await pc.setLocalDescription(o); sig({ type: 'offer', sdp: o, video: v }); }
+  catch (err) { alert('Camera / microphone: ' + err.message); hangup(true); }
+}
+$('#vc').onclick = () => startCall(true); $('#ac').onclick = () => startCall(false);
 $('#yes').onclick = async () => {
   $('#ring').hidden = true;
   try {
-    await media();
-    await pc.setRemoteDescription(offer);
-    for (const c of queue) await pc.addIceCandidate(c);
-    queue = [];
-    const a = await pc.createAnswer();
-    await pc.setLocalDescription(a);
-    sig({ type: 'answer', sdp: a });
+    await media(wantVideo); await pc.setRemoteDescription(offer);
+    for (const c of queue2) await pc.addIceCandidate(c);
+    queue2 = [];
+    const a = await pc.createAnswer(); await pc.setLocalDescription(a); sig({ type: 'answer', sdp: a });
   } catch (err) { alert('Camera / microphone: ' + err.message); hangup(true); }
 };
-$('#no').onclick = () => hangup(true);
-$('#end').onclick = () => hangup(true);
+$('#no').onclick = $('#end').onclick = () => hangup(true);
+$('#mu').onclick = () => { const a = local.getAudioTracks()[0]; a.enabled = !a.enabled; $('#mu').textContent = a.enabled ? '🎤' : '🔇'; };
+$('#cm').onclick = () => { const v = local.getVideoTracks()[0]; v.enabled = !v.enabled; $('#cm').textContent = v.enabled ? '📷' : '🚫'; };
 socket.on('call', async ({ from, data }) => {
   if (data.type === 'offer') {
-    if (peer) return socket.emit('call', { to: from, data: { type: 'end' } }); // already in a call
-    peer = from; offer = data.sdp; queue = [];
-    $('#who').textContent = nameOf(from) + ' ' + t('incoming');
+    if (peer) return socket.emit('call', { to: from, data: { type: 'end' } });
+    peer = from; offer = data.sdp; queue2 = []; wantVideo = data.video !== false;
+    $('#who').textContent = (wantVideo ? '🎥 ' : '📞 ') + nameOf(from) + ' ' + t('incoming');
     $('#ring').hidden = false;
   } else if (from !== peer) return;
-  else if (data.type === 'ice') {
-    if (pc && pc.remoteDescription) await pc.addIceCandidate(data.candidate);
-    else queue.push(data.candidate);
-  } else if (data.type === 'answer') await pc.setRemoteDescription(data.sdp);
+  else if (data.type === 'ice') { if (pc && pc.remoteDescription) await pc.addIceCandidate(data.candidate); else queue2.push(data.candidate); }
+  else if (data.type === 'answer') await pc.setRemoteDescription(data.sdp);
   else if (data.type === 'end') hangup(false);
 });
 
-render();
+labels();
 </script>
 </body>
 </html>
