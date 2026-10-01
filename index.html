@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="kn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kannada Health and Fitness</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600&display=swap">
+<style>
+:root{--bg:#f3f7f4;--card:#fff;--ink:#14211b;--mute:#66776e;--pri:#0f8a5f;--mine:#d6f3e4;--line:#dce6e0}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1411;--card:#16201b;--ink:#e7f0ea;--mute:#8da096;--pri:#2fc08a;--mine:#1a4332;--line:#25322b}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px 'Noto Sans Kannada',system-ui,sans-serif}
+button,input{font:inherit;color:inherit}
+button{border:0;border-radius:10px;padding:.55rem .9rem;background:var(--pri);color:#fff;cursor:pointer}
+input{border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem;background:var(--card);min-width:0}
+#login{max-width:340px;margin:18vh auto;padding:16px;display:grid;gap:12px;text-align:center}
+.lang,#out{background:none;color:var(--mute)}
+#gbtn{justify-self:center;min-height:44px}
+#app{display:grid;grid-template-columns:230px 1fr;height:100dvh}
+#side{display:flex;flex-direction:column;gap:4px;padding:8px;overflow:auto;background:var(--card);border-right:1px solid var(--line)}
+#side button{background:none;color:var(--ink);text-align:left}
+#side button.on{background:var(--mine)}
+main{display:flex;flex-direction:column;min-height:0}
+header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line)}
+#log{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:12px;gap:6px}
+#log>button{align-self:center;background:none;color:var(--mute)}
+.m{max-width:80%;padding:.45rem .75rem;border-radius:12px;background:var(--card);align-self:flex-start;white-space:pre-wrap;overflow-wrap:anywhere}
+.m.me{align-self:flex-end;background:var(--mine)}
+.m small{display:block;color:var(--mute)}
+#f{display:flex;gap:8px;padding:10px;background:var(--card);border-top:1px solid var(--line)}
+#msg{flex:1}
+#call,#ring{position:fixed;inset:0;background:#000c;display:grid;place-items:center}
+#theirs{width:100%;height:100%;object-fit:cover;background:#000}
+#mine{position:absolute;right:12px;top:12px;width:30%;max-width:160px;border-radius:12px}
+#end{position:absolute;bottom:24px;background:#d33}
+#ring div{background:var(--card);padding:20px;border-radius:14px;display:grid;gap:12px;text-align:center}
+@media(max-width:700px){#app{grid-template-columns:1fr;grid-template-rows:auto 1fr}#side{flex-direction:row;border-right:0;border-bottom:1px solid var(--line)}#side button{white-space:nowrap}}
+</style>
+</head>
+<body>
+<div id="login">
+  <h1 data-t="title"></h1>
+  <div id="gbtn"></div>
+  <p id="gerr" hidden>Google sign-in is not set up: set GOOGLE_CLIENT_ID on the server.</p>
+  <button type="button" class="lang">ಕನ್ನಡ | English</button>
+</div>
+<div id="app" hidden>
+  <nav id="side"></nav>
+  <main>
+    <header><b id="head"></b><span><button id="vc" data-t="call" hidden></button> <button type="button" class="lang">ಕನ್ನಡ | EN</button> <button id="out" data-t="out"></button></span></header>
+    <div id="log"></div>
+    <form id="f"><input id="msg" autocomplete="off"><button data-t="send"></button></form>
+  </main>
+</div>
+<div id="call" hidden><video id="theirs" autoplay playsinline></video><video id="mine" autoplay playsinline muted></video><button id="end" data-t="end"></button></div>
+<div id="ring" hidden><div><p id="who"></p><button id="yes" data-t="accept"></button><button id="no" data-t="decline"></button></div></div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const T = {
+  kn: { title:'ಕನ್ನಡ ಆರೋಗ್ಯ ಮತ್ತು ಫಿಟ್ನೆಸ್', name:'ನಿಮ್ಮ ಹೆಸರು', join:'ಸೇರಿ', msg:'ಸಂದೇಶ ಬರೆಯಿರಿ', send:'ಕಳುಹಿಸಿ', older:'ಹಳೆಯ ಸಂದೇಶಗಳು', call:'ವೀಡಿಯೊ ಕರೆ', end:'ಕರೆ ಮುಗಿಸಿ', accept:'ಸ್ವೀಕರಿಸಿ', decline:'ತಿರಸ್ಕರಿಸಿ', incoming:'ಕರೆ ಬರುತ್ತಿದೆ', pick:'ಒಂದು ಚಾಟ್ ಆರಿಸಿ', err:'ಸೈನ್ ಇನ್ ವಿಫಲವಾಗಿದೆ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ', out:'ಸೈನ್ ಔಟ್', yoga:'ಯೋಗ', diet:'ಆಹಾರ ಕ್ರಮ', 'weight-loss':'ತೂಕ ಇಳಿಕೆ', general:'ಸಾಮಾನ್ಯ' },
+  en: { title:'Kannada Health and Fitness', name:'Your name', join:'Join', msg:'Type a message', send:'Send', older:'Older messages', call:'Video call', end:'End call', accept:'Accept', decline:'Decline', incoming:'is calling', pick:'Pick a chat', err:'Sign-in failed. Please try again', out:'Sign out', yoga:'Yoga', diet:'Diet', 'weight-loss':'Weight loss', general:'General' }
+};
+const $ = (s) => document.querySelector(s);
+const el = (tag, text) => Object.assign(document.createElement(tag), { textContent: text });
+const socket = io();
+let lang = 'kn', me = null, chat = null, groups = [], users = [];
+const store = {}, names = {}, unread = new Set();
+const t = (k) => T[lang][k] || k;
+const nameOf = (id) => names[id] || '';
+const dm = (a, b) => 'dm:' + [a, b].sort().join('|');
+const key = (c) => (c.startsWith('group:') ? c : dm(me, c.slice(5)));
+
+function draw() {
+  const log = $('#log'); log.innerHTML = '';
+  if (!chat) { log.textContent = t('pick'); return; }
+  const list = store[key(chat)] || [];
+  const more = el('button', t('older'));
+  more.onclick = () => socket.emit('history', { to: chat, before: list[0] && list[0].ts }, (old) => { store[key(chat)] = [...old, ...list]; draw(); });
+  log.append(more);
+  list.forEach((m) => {
+    const d = el('div', ''); d.className = 'm' + (m.from === me ? ' me' : '');
+    d.append(el('small', m.name || ''), m.text);
+    log.append(d);
+  });
+  log.scrollTop = log.scrollHeight;
+}
+function render() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-t]').forEach((e) => (e.textContent = t(e.dataset.t)));
+  $('#msg').placeholder = t('msg');
+  const side = $('#side'); side.innerHTML = '';
+  const chip = (id, label) => {
+    const b = el('button', label + (unread.has(id) ? ' •' : ''));
+    if (id === chat) b.className = 'on';
+    b.onclick = () => openChat(id);
+    side.append(b);
+  };
+  groups.forEach((g) => chip('group:' + g, '# ' + t(g)));
+  users.filter((u) => u.id !== me).forEach((u) => chip('user:' + u.id, '🟢 ' + u.name));
+  const isDm = chat && chat.startsWith('user:');
+  $('#head').textContent = !chat ? t('title') : isDm ? nameOf(chat.slice(5)) : '# ' + t(chat.slice(6));
+  $('#vc').hidden = !isDm;
+  draw();
+}
+function openChat(id) {
+  chat = id; unread.delete(id);
+  socket.emit('history', { to: id }, (list) => { store[key(id)] = list; render(); });
+  render();
+}
+
+socket.on('message', (m) => {
+  const isOpen = chat && key(chat) === m.convo;
+  if (isOpen) (store[m.convo] = store[m.convo] || []).push(m);
+  else if (m.from !== me) unread.add(m.convo.startsWith('group:') ? m.convo : 'user:' + m.from);
+  render();
+});
+socket.on('online', (l) => { users = l; l.forEach((u) => (names[u.id] = u.name)); if (me) render(); });
+socket.on('connect', () => { if (me) socket.emit('join', { session: localStorage.getItem('sess') }, (r) => { if (r.error) location.reload(); }); });
+socket.on('disconnect', (why) => { if (why === 'io server disconnect') { me = null; $('#app').hidden = true; $('#login').hidden = false; } }); // signed in somewhere else
+
+function signIn(auth) {
+  socket.connect();
+  socket.emit('join', auth, (r) => {
+    if (r.error) { localStorage.removeItem('sess'); if (auth.credential) alert(t('err')); return; }
+    me = r.id; groups = r.groups; localStorage.setItem('sess', r.session);
+    $('#login').hidden = true; $('#app').hidden = false;
+    render();
+  });
+}
+if (localStorage.getItem('sess')) signIn({ session: localStorage.getItem('sess') });
+fetch('/config.json').then((r) => r.json()).then(({ clientId }) => {
+  if (!clientId) return ($('#gerr').hidden = false);
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = () => {
+    google.accounts.id.initialize({ client_id: clientId, callback: (r) => signIn({ credential: r.credential }) });
+    google.accounts.id.renderButton($('#gbtn'), { theme: 'outline', size: 'large' });
+  };
+  document.head.append(s);
+});
+$('#out').onclick = () => { localStorage.removeItem('sess'); if (window.google) google.accounts.id.disableAutoSelect(); location.reload(); };
+document.querySelectorAll('.lang').forEach((b) => (b.onclick = () => { lang = lang === 'kn' ? 'en' : 'kn'; render(); }));
+$('#f').onsubmit = (e) => {
+  e.preventDefault();
+  const text = $('#msg').value.trim();
+  if (text && chat) { socket.emit('send', { to: chat, text }); $('#msg').value = ''; }
+};
+
+// ---- Video calls (WebRTC). Add a TURN server below for strict networks. ----
+const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+let pc, local, peer, offer, queue = [];
+const sig = (data) => socket.emit('call', { to: peer, data });
+
+async function media() {
+  local = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  $('#mine').srcObject = local;
+  pc = new RTCPeerConnection(ICE);
+  local.getTracks().forEach((tr) => pc.addTrack(tr, local));
+  pc.ontrack = (e) => ($('#theirs').srcObject = e.streams[0]);
+  pc.onicecandidate = (e) => e.candidate && sig({ type: 'ice', candidate: e.candidate.toJSON() });
+  $('#call').hidden = false;
+}
+function hangup(notify) {
+  if (notify && peer) sig({ type: 'end' });
+  if (pc) pc.close();
+  if (local) local.getTracks().forEach((tr) => tr.stop());
+  pc = local = peer = offer = null; queue = [];
+  $('#call').hidden = true; $('#ring').hidden = true;
+}
+$('#vc').onclick = async () => {
+  if (peer || !chat || !chat.startsWith('user:')) return;
+  peer = chat.slice(5);
+  try {
+    await media();
+    const o = await pc.createOffer();
+    await pc.setLocalDescription(o);
+    sig({ type: 'offer', sdp: o });
+  } catch (err) { alert('Camera / microphone: ' + err.message); hangup(true); }
+};
+$('#yes').onclick = async () => {
+  $('#ring').hidden = true;
+  try {
+    await media();
+    await pc.setRemoteDescription(offer);
+    for (const c of queue) await pc.addIceCandidate(c);
+    queue = [];
+    const a = await pc.createAnswer();
+    await pc.setLocalDescription(a);
+    sig({ type: 'answer', sdp: a });
+  } catch (err) { alert('Camera / microphone: ' + err.message); hangup(true); }
+};
+$('#no').onclick = () => hangup(true);
+$('#end').onclick = () => hangup(true);
+socket.on('call', async ({ from, data }) => {
+  if (data.type === 'offer') {
+    if (peer) return socket.emit('call', { to: from, data: { type: 'end' } }); // already in a call
+    peer = from; offer = data.sdp; queue = [];
+    $('#who').textContent = nameOf(from) + ' ' + t('incoming');
+    $('#ring').hidden = false;
+  } else if (from !== peer) return;
+  else if (data.type === 'ice') {
+    if (pc && pc.remoteDescription) await pc.addIceCandidate(data.candidate);
+    else queue.push(data.candidate);
+  } else if (data.type === 'answer') await pc.setRemoteDescription(data.sdp);
+  else if (data.type === 'end') hangup(false);
+});
+
+render();
+</script>
+</body>
+</html>
