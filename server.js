@@ -154,6 +154,7 @@ app.use((req, res, next) => { res.set({
   'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' ws: wss: https://accounts.google.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'none'; frame-ancestors 'self'" }); next(); });
 app.get('/config.json', (req, res) => res.json({ clientId: env.GOOGLE_CLIENT_ID }));
 app.get('/healthz', (req, res) => res.send('ok'));
+app.get('/sw.js', (req, res) => res.set('Cache-Control', 'no-cache').type('js').sendFile(path.join(__dirname, 'public', 'sw.js')));   // service worker: must never be cached for long
 app.get('/avatar-url', auth, async (req, res) => {          // profile / group photos: only signed-in users get a (15 minute) link
   try {
     const k = String(req.query.k || '');
@@ -202,7 +203,7 @@ app.get('/file-url', auth, async (req, res) => {
   } catch (e) { console.error('file-url', e.message); res.status(500).json({ error: 'fail' }); }
 });
 
-app.use((err, req, res, next) => res.status(err && err.code === 'LIMIT_FILE_SIZE' ? 413 : 500).json({ error: 'fail' }));
+app.use((err, req, res, next) => { console.error('http error:', err && (err.code || err.name), err && err.message); res.status(err && err.code === 'LIMIT_FILE_SIZE' ? 413 : 500).json({ error: 'fail', code: String((err && (err.code || err.name)) || 'fail').slice(0, 40) }); });
 
 /* ---------- realtime ---------- */
 const io = new Server(server, { maxHttpBufferSize: 1e6 });
