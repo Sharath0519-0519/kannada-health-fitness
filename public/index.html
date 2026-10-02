@@ -149,6 +149,15 @@ header .sp{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:elli
 .scf{position:absolute;inset:18%;border:3px solid #fff;border-radius:20px;box-shadow:0 0 0 999px #0007;pointer-events:none}
 #scan p{margin:0;padding:14px 18px;text-align:center;color:var(--mute);font-size:.9rem}
 .note{margin:0;color:var(--mute);font-size:.88rem;line-height:1.5}
+/* settings hub + switches */
+.si{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--pri);background:color-mix(in srgb,var(--pri) 10%,var(--panel));flex:none}
+.si svg{width:22px;height:22px}
+.tg{display:flex;align-items:center;gap:12px;padding:8px 2px;cursor:pointer}
+.tg>span{flex:1;display:grid;gap:1px}.tg small{color:var(--mute);font-size:.8rem}
+.tg input{appearance:none;-webkit-appearance:none;width:46px;height:27px;padding:0;border:0;border-radius:14px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.tg input::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px #0004}
+.tg input:checked{background:var(--pri)}.tg input:checked::after{transform:translateX(19px)}
+input[type=range]{padding:0;border:0;background:transparent;width:100%;accent-color:var(--pri)}
 </style>
 </head>
 <body>
@@ -248,6 +257,11 @@ const P = {
   location:'M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z',
   menu:'M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
   chev:'M7 10l5 5 5-5z',
+  bell:'M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z',
+  lock:'M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM9 6a3 3 0 0 1 6 0v2H9V6zm3 11a2 2 0 1 1 0-4 2 2 0 0 1 0 4z',
+  qr:'M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 19h2v2h-2zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM15 19h2v2h-2zM17 17h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2z',
+  palette:'M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.4a4.6 4.6 0 0 0 4.6-4.6C22 6.4 17.5 3 12 3zM6.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
+  heart:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
   ck1:'M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
   ck2:'M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41 6 19l1.41-1.41L1.83 12 .41 13.41z'
 };
@@ -407,7 +421,7 @@ socket.on('message', (m) => {
   (store[k] = store[k] || []).push(m);
   if (open) { drawLog(m.from === me); if (m.from !== me) markRead(); }
   else if (m.from !== me && m.from !== 'system') { unread[peer] = (unread[peer] || 0) + 1; }
-  if (m.from !== me && m.from !== 'system' && (document.hidden || !open) && !muted.has(peer) && window.Notification && Notification.permission === 'granted') new Notification(m.name || nameOf(peer), { body: preview(m) });
+  if (m.from !== me && m.from !== 'system') notifyIncoming(m, peer, open);
   drawList();
 });
 socket.on('online', (l) => {
@@ -441,7 +455,7 @@ function signIn(auth) {
     (r.recent || []).forEach(({ user, last, unread: n }) => { const c = addContact(user); if (!c.lt || last.ts > c.lt) { c.lt = last.ts; c.lp = preview(last); } if (n) unread[user.id] = n; });
     (r.groups || []).forEach((G) => { const c = putGroup(G); if (G.last) { c.lt = G.last.ts; c.lp = (G.last.from === me || G.last.from === 'system' || !G.last.name ? '' : G.last.name + ': ') + preview(G.last); } if (G.unread) unread[G.id] = G.unread; });
     $('#login').hidden = true; $('#app').hidden = false;
-    if (window.Notification && Notification.permission === 'default') Notification.requestPermission();
+    askNotifOnce();
     drawHead(); drawList(); refreshStatus();
     if (pendingLink) { const c = pendingLink; pendingLink = ''; askLink(c); }            // opened from a QR code scanned with the phone's own camera
   });
@@ -509,7 +523,7 @@ function shrink(file) {
   });
 }
 const upMsg = (e) => e.status === 401 ? tt('Session expired. Please sign out and sign in again.', 'ಸೆಷನ್ ಮುಗಿದಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.')
-  : e.status === 413 ? t('big') : e.code ? tt('Upload failed', 'ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಯಿತು') + ' (' + e.code + ')' : '';
+  : e.status === 413 ? t('big') : tt('Upload failed', 'ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಯಿತು') + ' (' + (e.code || (e.status ? 'HTTP ' + e.status : e.message) || '?') + ')';
 function toData(file, cb) {
   if (file.size > MAX) return toast(t('big'));
   toast(tt('Uploading…', 'ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ…'));
@@ -521,7 +535,7 @@ function toData(file, cb) {
         cb({ name: file.name || f.name || 'file', type: f.type || file.type || 'application/octet-stream', size: f.size, key: j.key });
       });
     })
-    .catch((e) => toast(upMsg(e) || tt('Upload failed. Try again.', 'ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಯಿತು. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.')));
+    .catch((e) => { console.error('upload', e); toast(upMsg(e)); });
 }
 $('#f').onsubmit = (e) => {
   e.preventDefault();
@@ -659,8 +673,10 @@ socket.on('call', async ({ from, data }) => {
 /* ---------- extras: health, starred, search, settings, lock, themes ---------- */
 const tt = (e, k) => (lang === 'kn' ? k : e);
 const ymd = (d) => d.toLocaleDateString('en-CA');
-const sheet = (title, ...n) => { $('#sht').textContent = title; $('#shb').replaceChildren(...n); $('#sh').hidden = false; };
-$('#shx').onclick = () => ($('#sh').hidden = true);
+let sheetBack = null;
+const sheet = (title, ...n) => { sheetBack = null; $('#sht').textContent = title; $('#shb').replaceChildren(...n); $('#sh').hidden = false; };
+$('#shx').onclick = () => { const b = sheetBack; sheetBack = null; b ? b() : ($('#sh').hidden = true); };
+const sub = (title, back, ...n) => { sheet(title, ...n); sheetBack = back; };
 const row2 = (a, b, fn) => { const r = el('button', 'row'), x = el('div', 't'); x.append(el('b', '', a), el('span', 'pv', b || '')); r.append(x); r.onclick = fn; return r; };
 const lab = (txt, ...n) => { const d = el('div'); d.style.cssText = 'display:grid;gap:6px'; d.append(el('b', '', txt), ...n); return d; };
 const opts = (sel, list) => list.forEach(([v, l]) => { const o = el('option', '', l); o.value = v; sel.append(o); });
@@ -687,7 +703,7 @@ function health() {
   sheet(tt('Health', 'ಆರೋಗ್ಯ'), lab('BMI', bw, bh, br), lab(tt('Today', 'ಇಂದು'), trk(tt('Water', 'ನೀರು'), 'w', 1, tt('glasses', 'ಲೋಟ')), trk(tt('Steps', 'ಹೆಜ್ಜೆ'), 's', 500, ''), trk(tt('Calories', 'ಕ್ಯಾಲೊರಿ'), 'c', 100, 'kcal')), lab(tt('Steps – last 7 days', 'ಹೆಜ್ಜೆ – ಕಳೆದ 7 ದಿನ'), ch), lab(tt('Water reminder', 'ನೀರಿನ ಜ್ಞಾಪನೆ'), ws), lab(tt('Daily workout reminder', 'ದಿನದ ವ್ಯಾಯಾಮ ಜ್ಞಾಪನೆ'), wt));
 }
 setInterval(() => {
-  const r = load('rem', {}), L = load('rl', {}), n = new Date(), ping = (b) => (window.Notification && Notification.permission === 'granted' ? new Notification(b) : toast(b));
+  const r = load('rem', {}), L = load('rl', {}), n = new Date(), ping = (b) => { if (!popup(b, '', 'rem', false)) toast(b); playTone(NS().tone, NS().vol); };
   if (r.wm && Date.now() - (L.w || 0) >= r.wm * 6e4) { L.w = Date.now(); ping(tt('Time to drink water', 'ನೀರು ಕುಡಿಯುವ ಸಮಯ')); }
   if (r.wt && r.wt === n.toTimeString().slice(0, 5) && L.t !== ymd(n)) { L.t = ymd(n); ping(tt('Time for your workout', 'ವ್ಯಾಯಾಮದ ಸಮಯ')); }
   save('rl', L);
@@ -702,13 +718,89 @@ function searchAll() {
   sheet(tt('Search all chats', 'ಎಲ್ಲಾ ಚಾಟ್ ಹುಡುಕಿ'), i, L); i.focus();
 }
 const fwd = (m) => sheet(tt('Forward to…', 'ಇವರಿಗೆ ಕಳುಹಿಸಿ…'), ...contacts.filter((c) => !blocked.has(c.id)).map((c) => row2(c.name || c.email, '', () => { send({ text: m.text || '', file: m.file }, c.id); $('#sh').hidden = true; toast('✓'); })));
+/* ---- notifications: tone, vibration, popup ---- */
+const NS = () => Object.assign({ sound: 1, tone: 'pop', vol: 0.8, vib: 1, prev: 1, inchat: 1 }, load('ns', {}));
+const setNS = (k, v) => save('ns', Object.assign(NS(), { [k]: v }));
+let AC = null, swReg = null;
+const audioCtx = () => { if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); } return AC; };
+['pointerdown', 'touchend', 'keydown', 'click'].forEach((ev) => addEventListener(ev, () => { const a = audioCtx(); if (a && a.state !== 'running') a.resume().catch(() => {}); }, { passive: true }));
+const TONES = { pop: [[880, 0, .09], [1320, .07, .14]], ding: [[1175, 0, .6]], chime: [[784, 0, .2], [988, .16, .2], [1318, .32, .4]], drop: [[700, 0, .1], [440, .09, .2]] };
+function playTone(name, vol) {
+  const a = audioCtx(); if (!a) return; if (a.state !== 'running') a.resume().catch(() => {});
+  const t0 = a.currentTime + .02, v = Math.max(.02, Math.min(1, vol == null ? .8 : vol));
+  (TONES[name] || TONES.pop).forEach(([f, at, d]) => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t0 + at); g.gain.exponentialRampToValueAtTime(v * .6, t0 + at + .015); g.gain.exponentialRampToValueAtTime(.0001, t0 + at + d);
+    o.connect(g); g.connect(a.destination); o.start(t0 + at); o.stop(t0 + at + d + .05);
+  });
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').then((r) => (swReg = r)).catch(() => {});
+function popup(title, body, tag, silent) {                        // Android Chrome only allows notifications through the service worker
+  if (!window.Notification || Notification.permission !== 'granted') return false;
+  const o = { body: body || '', tag, renotify: !!tag, silent: !!silent };
+  try { if (swReg && swReg.showNotification) { swReg.showNotification(title, o); return true; } new Notification(title, o); return true; }
+  catch (e) { try { new Notification(title, o); return true; } catch (_) { return false; } }
+}
+function askNotifOnce() {
+  if (!window.Notification || Notification.permission !== 'default') return;
+  document.addEventListener('click', () => { try { Notification.requestPermission(); } catch (e) {} }, { once: true });
+}
+function notifyIncoming(m, peer, open) {
+  if (muted.has(peer)) return;
+  const s = NS(), vis = !document.hidden, g = isG(peer), here = open && vis;
+  const title = g ? nameOf(peer) : (m.name || nameOf(peer)), body = s.prev ? (g && m.name ? m.name + ': ' : '') + preview(m) : tt('New message', 'ಹೊಸ ಸಂದೇಶ');
+  if (s.sound && (!here || s.inchat)) playTone(here ? 'pop' : s.tone, here ? s.vol * .6 : s.vol);
+  if (!vis) { popup(title, body, 'm-' + peer, !!s.sound); if (s.vib && navigator.vibrate) try { navigator.vibrate([120, 60, 120]); } catch (e) {} }
+}
+
+/* ---- settings (WhatsApp style: hub + sub pages) ---- */
+const srow = (ic, title, subt, fn) => { const r = el('button', 'row'), i = el('span', 'si'), x = el('div', 't'); i.innerHTML = ico(ic); x.append(el('b', '', title), el('span', 'pv', subt || '')); r.append(i, x); r.onclick = fn; return r; };
+const tg = (label, hint, get, set) => { const l = el('label', 'tg'), s2 = el('span'), i = el('input'); i.type = 'checkbox'; i.checked = !!get(); i.onchange = () => set(i.checked); s2.append(el('b', '', label)); if (hint) s2.append(el('small', '', hint)); l.append(s2, i); return l; };
 function settings() {
-  const th = el('select'), ds = el('select'), pn = el('input'), ps = el('button', 'pb', tt('Save PIN', 'PIN ಉಳಿಸಿ'));
+  const u = info[me] || {}, card = el('button', 'row'), a = av(u), x = el('div', 't');
+  a.style.cssText += ';width:64px;height:64px;font-size:1.3rem'; x.append(el('b', '', u.name || ''), el('span', 'pv', u.about || u.email || ''));
+  card.append(a, x); card.onclick = profilePage; card.style.borderBottom = '1px solid var(--line)';
+  sheet(tt('Settings', 'ಸೆಟ್ಟಿಂಗ್ಸ್'), card,
+    srow('camera', tt('Status', 'ಸ್ಟೇಟಸ್'), tt('Post a photo, video or text for 24 h+', 'ಫೋಟೋ, ವೀಡಿಯೊ ಅಥವಾ ಪಠ್ಯ ಹಾಕಿ'), statuses),
+    srow('qr', tt('Linked devices', 'ಲಿಂಕ್ ಮಾಡಿದ ಸಾಧನಗಳು'), tt('Sign in on a computer with a QR code', 'QR ಕೋಡ್‌ನಿಂದ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಸೈನ್ ಇನ್'), () => devices(settings)),
+    srow('bell', tt('Notifications', 'ಅಧಿಸೂಚನೆಗಳು'), tt('Message sound, vibration, popups', 'ಸಂದೇಶ ಶಬ್ದ, ಕಂಪನ, ಪಾಪ್‌ಅಪ್'), notifPage),
+    srow('lock', tt('Privacy', 'ಗೌಪ್ಯತೆ'), tt('Chat lock, blocked contacts', 'ಚಾಟ್ ಲಾಕ್, ಬ್ಲಾಕ್ ಮಾಡಿದವರು'), privacyPage),
+    srow('palette', tt('Chats', 'ಚಾಟ್‌ಗಳು'), tt('Theme, disappearing messages', 'ಥೀಮ್, ಮಾಯವಾಗುವ ಸಂದೇಶಗಳು'), chatsPage),
+    srow('globe', tt('App language', 'ಆಪ್ ಭಾಷೆ'), lang === 'kn' ? 'ಕನ್ನಡ' : 'English', () => { $('.lang').click(); settings(); }),
+    srow('heart', tt('Health', 'ಆರೋಗ್ಯ'), tt('BMI, water, steps, reminders', 'BMI, ನೀರು, ಹೆಜ್ಜೆ, ಜ್ಞಾಪನೆ'), health),
+    srow('logout', tt('Log out', 'ಸೈನ್ ಔಟ್'), '', () => $('#out').click()));
+}
+function profilePage() { sub(tt('Profile', 'ಪ್ರೊಫೈಲ್'), settings, profileBlock()); }
+function notifPage() {
+  const s = NS(), tone = el('select'), vol = el('input'), test = el('button', 'alt', tt('Play test sound', 'ಶಬ್ದ ಪರೀಕ್ಷಿಸಿ')), st = window.Notification ? Notification.permission : 'none', out = [];
+  opts(tone, [['pop', tt('Pop', 'ಪಾಪ್')], ['ding', tt('Ding', 'ಡಿಂಗ್')], ['chime', tt('Chime', 'ಚೈಮ್')], ['drop', tt('Drop', 'ಡ್ರಾಪ್')]]); tone.value = s.tone;
+  tone.onchange = () => { setNS('tone', tone.value); playTone(tone.value, NS().vol); };
+  vol.type = 'range'; vol.min = 0.1; vol.max = 1; vol.step = 0.05; vol.value = s.vol; vol.onchange = () => { setNS('vol', +vol.value); playTone(NS().tone, +vol.value); };
+  test.onclick = () => { const a = audioCtx(); if (a) a.resume().catch(() => {}); playTone(NS().tone, NS().vol); };
+  out.push(tg(tt('Message sounds', 'ಸಂದೇಶ ಶಬ್ದ'), tt('Play a sound when a message arrives', 'ಸಂದೇಶ ಬಂದಾಗ ಶಬ್ದ ಮಾಡಿ'), () => NS().sound, (v) => setNS('sound', v ? 1 : 0)),
+    lab(tt('Sound', 'ಶಬ್ದ'), tone), lab(tt('Volume', 'ಧ್ವನಿ ಪ್ರಮಾಣ'), vol), test,
+    tg(tt('Sound while chat is open', 'ಚಾಟ್ ತೆರೆದಿರುವಾಗ ಶಬ್ದ'), '', () => NS().inchat, (v) => setNS('inchat', v ? 1 : 0)));
+  if (navigator.vibrate) out.push(tg(tt('Vibrate', 'ಕಂಪನ'), tt('When the app is in the background', 'ಆಪ್ ಹಿನ್ನೆಲೆಯಲ್ಲಿದ್ದಾಗ'), () => NS().vib, (v) => setNS('vib', v ? 1 : 0)));
+  out.push(tg(tt('Show message preview', 'ಸಂದೇಶದ ಮುನ್ನೋಟ ತೋರಿಸಿ'), '', () => NS().prev, (v) => setNS('prev', v ? 1 : 0)));
+  if (st === 'default') { const b = el('button', 'pb', tt('Allow popup notifications', 'ಅಧಿಸೂಚನೆಗಳನ್ನು ಅನುಮತಿಸಿ')); b.onclick = () => Notification.requestPermission().then(notifPage); out.push(b); }
+  else if (st === 'denied') out.push(el('p', 'note', tt('Popups are blocked. Allow notifications for this site in your browser settings.', 'ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. ಬ್ರೌಸರ್‌ನ ಸೈಟ್ ಸೆಟ್ಟಿಂಗ್ಸ್‌ನಲ್ಲಿ ಅನುಮತಿಸಿ.')));
+  else if (st === 'none') out.push(el('p', 'note', tt('This browser does not support popup notifications.', 'ಈ ಬ್ರೌಸರ್ ಪಾಪ್‌ಅಪ್ ಅಧಿಸೂಚನೆ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ.')));
+  out.push(el('p', 'note', tt('Tip: long-press a chat in the list to mute it.', 'ಸಲಹೆ: ಚಾಟ್ ಅನ್ನು ಮ್ಯೂಟ್ ಮಾಡಲು ಪಟ್ಟಿಯಲ್ಲಿ ಒತ್ತಿ ಹಿಡಿಯಿರಿ.')));
+  sub(tt('Notifications', 'ಅಧಿಸೂಚನೆಗಳು'), settings, ...out);
+}
+function privacyPage() {
+  const pn = el('input'), ps = el('button', 'pb', tt('Save PIN', 'PIN ಉಳಿಸಿ'));
+  pn.type = 'password'; pn.inputMode = 'numeric'; pn.placeholder = tt('New PIN (empty = remove)', 'ಹೊಸ PIN (ಖಾಲಿ = ತೆಗೆಯಿರಿ)');
+  ps.onclick = () => { pn.value ? (localStorage.pin = pn.value) : localStorage.removeItem('pin'); pn.value = ''; toast('✓'); };
+  sub(tt('Privacy', 'ಗೌಪ್ಯತೆ'), settings, lab(tt('Chat lock', 'ಚಾಟ್ ಲಾಕ್'), pn, ps),
+    lab(tt('Blocked', 'ಬ್ಲಾಕ್ ಮಾಡಿದವರು'), ...([...blocked].length ? [...blocked].map((id) => row2(nameOf(id) || id, tt('Tap to unblock', 'ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಲು ಒತ್ತಿ'), () => { blocked.delete(id); save('blk', [...blocked]); privacyPage(); drawList(); })) : [el('span', 'note', '—')])));
+}
+function chatsPage() {
+  const th = el('select'), ds = el('select');
   opts(th, [['', 'Auto'], ['light', tt('Light', 'ಬೆಳಕು')], ['dark', tt('Dark', 'ಗಾಢ')]]); th.value = localStorage.theme || ''; th.onchange = () => { localStorage.theme = th.value; applyTheme(); };
   opts(ds, [[0, tt('Off', 'ಆಫ್')], [24, '24 h'], [168, '7 d']]); ds.value = localStorage.dis || 0; ds.onchange = () => { localStorage.dis = ds.value; drawLog(); };
-  pn.type = 'password'; pn.inputMode = 'numeric'; pn.placeholder = tt('New PIN (empty = remove)', 'ಹೊಸ PIN (ಖಾಲಿ = ತೆಗೆಯಿರಿ)');
-  ps.onclick = () => { pn.value ? (localStorage.pin = pn.value) : localStorage.removeItem('pin'); toast('✓'); };
-  sheet(tt('Settings', 'ಸೆಟ್ಟಿಂಗ್ಸ್'), profileBlock(), lab(tt('Theme', 'ಥೀಮ್'), th), lab(tt('Disappearing messages (hidden on this device)', 'ಮಾಯವಾಗುವ ಸಂದೇಶಗಳು'), ds), lab(tt('Chat lock', 'ಚಾಟ್ ಲಾಕ್'), pn, ps), lab(tt('Blocked', 'ಬ್ಲಾಕ್ ಮಾಡಿದವರು'), ...[...blocked].map((id) => row2(nameOf(id) || id, tt('Tap to unblock', 'ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಲು ಒತ್ತಿ'), () => { blocked.delete(id); save('blk', [...blocked]); settings(); drawList(); }))));
+  sub(tt('Chats', 'ಚಾಟ್‌ಗಳು'), settings, lab(tt('Theme', 'ಥೀಮ್'), th), lab(tt('Disappearing messages (hidden on this device)', 'ಮಾಯವಾಗುವ ಸಂದೇಶಗಳು'), ds));
 }
 const lock = () => { $('#lkt').textContent = tt('Enter PIN', 'PIN ನಮೂದಿಸಿ'); $('#lkb').textContent = tt('Unlock', 'ತೆರೆಯಿರಿ'); $('#lki').value = ''; $('#lk').hidden = false; $('#lki').focus(); };
 $('#lkb').onclick = () => { if ($('#lki').value === localStorage.pin) $('#lk').hidden = true; else { $('#lkt').textContent = tt('Wrong PIN', 'ತಪ್ಪು PIN'); $('#lki').value = ''; } };
@@ -717,7 +809,7 @@ if (localStorage.pin) lock();
 document.addEventListener('visibilitychange', () => document.hidden && localStorage.pin && lock());
 
 /* ---------- profile (settings) + status ---------- */
-const pickFile = (accept, cb) => { const i = document.createElement('input'); i.type = 'file'; i.accept = accept; i.onchange = () => i.files[0] && cb(i.files[0]); i.click(); };
+const pickFile = (accept, cb) => { document.querySelectorAll('input[data-pk]').forEach((x) => x.remove()); const i = document.createElement('input'); i.type = 'file'; i.accept = accept; i.dataset.pk = 1; i.hidden = true; i.onchange = () => { const f = i.files[0]; i.remove(); if (f) cb(f); }; document.body.append(i); i.click(); };
 socket.on('profile', (u) => {
   info[u.id] = Object.assign(info[u.id] || {}, u, { picture: u.picture || undefined });
   const c = contacts.find((x) => x.id === u.id);
@@ -732,7 +824,7 @@ function profileBlock() {
   btns.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;justify-content:center';
   const ch = el('button', 'pb', tt('Change photo', 'ಫೋಟೋ ಬದಲಿಸಿ')), rm = el('button', 'alt', tt('Remove photo', 'ಫೋಟೋ ತೆಗೆಯಿರಿ')), nm = el('input'), ab = el('input'), sv = el('button', 'pb', tt('Save profile', 'ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ'));
   rm.style.width = 'auto'; sv.style.width = '100%';
-  const done = (r) => { if (r && r.ok) { toast('✓'); settings(); } else toast(tt('Could not update profile', 'ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಲಾಗಲಿಲ್ಲ')); };
+  const done = (r) => { if (r && r.ok) { toast('✓'); profilePage(); } else toast(tt('Could not update profile', 'ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಲಾಗಲಿಲ್ಲ')); };
   ch.onclick = a.onclick = () => pickFile('image/*', (f) => toData(f, (r) => socket.emit('profile:update', { picture: r.key }, done)));
   rm.onclick = () => socket.emit('profile:update', { picture: null }, done);
   nm.value = u.name || ''; nm.maxLength = 60; nm.placeholder = tt('Your name', 'ನಿಮ್ಮ ಹೆಸರು');
@@ -926,13 +1018,15 @@ function avatarSrc(pic, img) {                                   // our own phot
   }
   avCache.get(pic).then((u) => (img.src = u)).catch(() => img.onerror && img.onerror());
 }
-function xhrUpload(fd) {
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+function xhrUpload(fd, tries = 3) {                              // retries on network errors / 502-504 (e.g. server waking up)
   return new Promise((ok, no) => {
-    const x = new XMLHttpRequest(); x.open('POST', '/upload'); x.setRequestHeader('x-session', localStorage.getItem('sess') || '');
+    const x = new XMLHttpRequest(); x.open('POST', '/upload'); x.setRequestHeader('x-session', localStorage.getItem('sess') || ''); x.timeout = 120000;
     x.upload.onprogress = (e) => e.lengthComputable && toast(tt('Uploading… ', 'ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ… ') + Math.round(e.loaded / e.total * 100) + '%');
     x.onload = () => { let j = {}; try { j = JSON.parse(x.responseText); } catch (e) {} ok({ r: { status: x.status }, j }); };
-    x.onerror = () => no(new Error('network')); x.send(fd);
-  });
+    x.onerror = () => no(new Error('network')); x.ontimeout = () => no(new Error('timeout')); x.send(fd);
+  }).then((res) => (res.r.status >= 502 && res.r.status <= 504 && tries > 1 ? wait(2500).then(() => xhrUpload(fd, tries - 1)) : res),
+          (err) => (tries > 1 ? wait(2500).then(() => xhrUpload(fd, tries - 1)) : Promise.reject(err)));
 }
 
 /* ---------- status ring (unseen updates) + group challenges ---------- */
@@ -1034,7 +1128,8 @@ function askLink(code) {
       el('p', 'note', tt('Only link a device you are using right now. It will be able to read and send your messages.', 'ನೀವು ಈಗ ಬಳಸುತ್ತಿರುವ ಸಾಧನವನ್ನು ಮಾತ್ರ ಲಿಂಕ್ ಮಾಡಿ. ಅದು ನಿಮ್ಮ ಸಂದೇಶಗಳನ್ನು ಓದಬಹುದು ಮತ್ತು ಕಳುಹಿಸಬಹುದು.')), yes, no);
   });
 }
-function devices() {
+function devices(back) {
+  back = typeof back === 'function' ? back : null;
   socket.emit('devices', {}, (list) => {
     const link = el('button', 'pb', tt('Link a device', 'ಸಾಧನ ಲಿಂಕ್ ಮಾಡಿ')); link.onclick = scanLink;
     const rows = (list || []).map((d) => {
@@ -1042,13 +1137,14 @@ function devices() {
       r.style.cursor = 'default';
       x.append(el('b', '', d.device), el('span', 'pv', d.current ? tt('This device', 'ಈ ಸಾಧನ') : tt('Last active', 'ಕೊನೆಯ ಬಳಕೆ') + ' · ' + dayLabel(d.last) + ' ' + fmt(d.last)));
       r.append(x);
-      if (!d.current) { const b = el('button', 'pb', tt('Log out', 'ಲಾಗ್ ಔಟ್')); b.style.padding = '.4rem .8rem'; b.onclick = () => socket.emit('device:revoke', { id: d.id }, devices); r.append(b); }
+      if (!d.current) { const b = el('button', 'pb', tt('Log out', 'ಲಾಗ್ ಔಟ್')); b.style.padding = '.4rem .8rem'; b.onclick = () => socket.emit('device:revoke', { id: d.id }, () => devices(back)); r.append(b); }
       return r;
     });
-    const all = el('button', 'alt', tt('Log out all other devices', 'ಉಳಿದ ಎಲ್ಲಾ ಸಾಧನಗಳಿಂದ ಲಾಗ್ ಔಟ್')); all.onclick = () => socket.emit('device:revoke_others', {}, devices);
+    const all = el('button', 'alt', tt('Log out all other devices', 'ಉಳಿದ ಎಲ್ಲಾ ಸಾಧನಗಳಿಂದ ಲಾಗ್ ಔಟ್')); all.onclick = () => socket.emit('device:revoke_others', {}, () => devices(back));
     sheet(tt('Linked devices', 'ಲಿಂಕ್ ಮಾಡಿದ ಸಾಧನಗಳು'),
       el('p', 'note', tt('Use your chats on a computer or tablet: open the website there, choose “Sign in with QR code”, then tap Link a device and scan it. You can link as many devices as you like.', 'ಕಂಪ್ಯೂಟರ್ ಅಥವಾ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ವೆಬ್‌ಸೈಟ್ ತೆರೆಯಿರಿ, “QR ಕೋಡ್‌ನಿಂದ ಸೈನ್ ಇನ್ ಮಾಡಿ” ಆಯ್ಕೆಮಾಡಿ, ನಂತರ ಇಲ್ಲಿ “ಸಾಧನ ಲಿಂಕ್ ಮಾಡಿ” ಒತ್ತಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ. ಎಷ್ಟು ಸಾಧನಗಳನ್ನಾದರೂ ಲಿಂಕ್ ಮಾಡಬಹುದು.')),
       link, ...rows, ...(rows.length > 1 ? [all] : []));
+    sheetBack = back;
   });
 }
 
