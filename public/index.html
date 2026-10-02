@@ -46,6 +46,7 @@ header .sp{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:elli
 .av{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:600;font-size:.95rem;letter-spacing:.02em;position:relative;box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px var(--line)}
 .av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .av.mono{background:radial-gradient(circle at 28% 18%,#ffffff45,#fff0 58%),linear-gradient(150deg,hsl(var(--h) 42% 40%),hsl(calc(var(--h) + 30) 48% 22%))}
+.av.st{box-shadow:0 0 0 2px var(--panel),0 0 0 4.5px var(--pri)}
 .av.on::after{content:"";position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2.5px var(--panel)}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px}
 #side-t{padding:12px 16px 8px;display:grid;gap:10px}
@@ -136,6 +137,18 @@ header .sp{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:elli
 #ring div{background:var(--panel);color:var(--ink);padding:24px;border-radius:20px;display:grid;gap:12px;text-align:center;box-shadow:0 24px 60px #0006}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media(max-width:700px){#app{grid-template-columns:1fr}#app:not(.open) main,#app.open aside{display:none}#back{display:block}#log{padding:12px 10px}.m{max-width:86%}#ms{width:90px}#login{margin:8vh auto}}
+/* linked devices / QR */
+.alt{font-size:.95rem;color:var(--mute);border:1px solid var(--line);border-radius:12px;padding:.6rem;width:100%}
+.alt:hover{background:var(--hd)}
+#qrp{display:grid;gap:14px;justify-items:center}
+#qrimg{width:224px;height:224px;padding:10px;background:#fff;border-radius:16px;border:1px solid var(--line);display:grid;place-items:center;color:#555;font-size:.85rem}
+#qrimg svg{width:100%;height:100%;display:block;fill:none}
+#qrp p{margin:0;color:var(--mute);font-size:.88rem;text-align:left;line-height:1.5}
+.scw{position:relative;background:#000;aspect-ratio:1;overflow:hidden}
+#scv{width:100%;height:100%;object-fit:cover;display:block}
+.scf{position:absolute;inset:18%;border:3px solid #fff;border-radius:20px;box-shadow:0 0 0 999px #0007;pointer-events:none}
+#scan p{margin:0;padding:14px 18px;text-align:center;color:var(--mute);font-size:.9rem}
+.note{margin:0;color:var(--mute);font-size:.88rem;line-height:1.5}
 </style>
 </head>
 <body>
@@ -145,6 +158,12 @@ header .sp{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:elli
   <p class="sub" data-t="sub"></p>
   <div id="gbtn"></div>
   <p id="gerr" hidden>Google sign-in is not set up: set GOOGLE_CLIENT_ID on the server.</p>
+  <button type="button" class="alt" id="qrb" data-t="qrlogin"></button>
+  <div id="qrp" hidden>
+    <div id="qrimg"></div>
+    <p data-t="qrhelp"></p>
+    <button type="button" class="alt" id="qrx" data-t="usegoogle"></button>
+  </div>
   <button type="button" class="lang">ಕನ್ನಡ | English</button>
 </div>
 
@@ -177,6 +196,8 @@ header .sp{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:elli
 <div id="pv" class="ov" hidden><div class="box"><div class="pvb"><div id="pvm"></div><input id="cap"><div style="display:flex;justify-content:space-between"><button id="pc" data-ic="close" style="color:var(--ic)"></button><button id="ps" class="pb" data-ic="send"></button></div></div></div></div>
 <div id="sh" class="ov" hidden><div class="box"><header><button id="shx" data-ic="back"></button><b id="sht"></b></header><div id="shb" style="overflow-y:auto;padding:8px 12px;display:grid;gap:10px;align-content:start"></div></div></div>
 <div id="lk" class="ov" style="background:var(--bg);z-index:20" hidden><div class="box" style="padding:20px;gap:10px;text-align:center"><b id="lkt"></b><input id="lki" type="password" inputmode="numeric"><button class="pb" id="lkb"></button></div></div>
+<div id="scan" class="ov" hidden><div class="box"><header><button id="scx" data-ic="close"></button><b data-t="scantitle"></b></header>
+  <div class="scw"><video id="scv" playsinline muted></video><i class="scf"></i></div><p data-t="scanhelp"></p></div></div>
 <div id="lb" class="ov" hidden></div>
 <div id="pop" hidden></div>
 <div id="toast" hidden></div>
@@ -192,6 +213,16 @@ const T = {
   kn: { title:'ಕನ್ನಡ ಆರೋಗ್ಯ ಮತ್ತು ಫಿಟ್ನೆಸ್', sub:'ನಿಮ್ಮ ಆರೋಗ್ಯ ಸಮುದಾಯದೊಂದಿಗೆ ಸುರಕ್ಷಿತವಾಗಿ ಚಾಟ್ ಮಾಡಿ', msg:'ಸಂದೇಶ ಬರೆಯಿರಿ', search:'ಹುಡುಕಿ', all:'ಎಲ್ಲಾ', unread:'ಓದದಿರುವುದು', newchat:'ಹೊಸ ಚಾಟ್', call:'ವೀಡಿಯೊ ಕರೆ', acall:'ಧ್ವನಿ ಕರೆ', end:'ಕರೆ ಮುಗಿಸಿ', accept:'ಸ್ವೀಕರಿಸಿ', decline:'ತಿರಸ್ಕರಿಸಿ', incoming:'ಕರೆ ಬರುತ್ತಿದೆ', pick:'ಚಾಟ್ ಆರಿಸಿ ಅಥವಾ ಹೊಸ ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ', err:'ಸೈನ್ ಇನ್ ವಿಫಲವಾಗಿದೆ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ', out:'ಸೈನ್ ಔಟ್', older:'ಹಳೆಯ ಸಂದೇಶಗಳು', online:'ಆನ್‌ಲೈನ್', offline:'ಆಫ್‌ಲೈನ್', typing:'ಟೈಪ್ ಮಾಡುತ್ತಿದ್ದಾರೆ…', photo:'ಫೋಟೋ ಮತ್ತು ವೀಡಿಯೊ', camera:'ಕ್ಯಾಮೆರಾ', doc:'ಡಾಕ್ಯುಮೆಂಟ್', audio:'ಆಡಿಯೋ', loc:'ಸ್ಥಳ', reply:'ಉತ್ತರಿಸಿ', copy:'ನಕಲಿಸಿ', star:'ನಕ್ಷತ್ರ ಹಾಕಿ', delme:'ನನಗೆ ಮಾತ್ರ ಅಳಿಸಿ', delall:'ಎಲ್ಲರಿಗೂ ಅಳಿಸಿ', deleted:'ಈ ಸಂದೇಶ ಅಳಿಸಲಾಗಿದೆ', email:'Google ಇಮೇಲ್ ಅಥವಾ ಹೆಸರು', start:'ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ', nf:'ಈ Google ಖಾತೆ ಸಿಗಲಿಲ್ಲ', big:'ಫೈಲ್ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ (15 MB ವರೆಗೆ)', mic:'ಮೈಕ್ರೋಫೋನ್ ಲಭ್ಯವಿಲ್ಲ', today:'ಇಂದು', yday:'ನಿನ್ನೆ', caption:'ಶೀರ್ಷಿಕೆ ಸೇರಿಸಿ', voice:'ಧ್ವನಿ ಸಂದೇಶ' },
   en: { title:'Kannada Health and Fitness', sub:'Chat securely with your health community', msg:'Type a message', search:'Search', all:'All', unread:'Unread', newchat:'New chat', call:'Video call', acall:'Voice call', end:'End call', accept:'Accept', decline:'Decline', incoming:'is calling', pick:'Pick a chat or start a new one', err:'Sign-in failed. Please try again', out:'Sign out', older:'Older messages', online:'online', offline:'offline', typing:'typing…', photo:'Photos & videos', camera:'Camera', doc:'Document', audio:'Audio', loc:'Location', reply:'Reply', copy:'Copy', star:'Star', delme:'Delete for me', delall:'Delete for everyone', deleted:'This message was deleted', email:'Google email or name', start:'Start chat with', nf:'No chat account found for that email', big:'File too large (max 15 MB)', mic:'Microphone unavailable', today:'Today', yday:'Yesterday', caption:'Add a caption', voice:'Voice message' }
 };
+Object.assign(T.kn, {
+  qrlogin:'QR ಕೋಡ್‌ನಿಂದ ಸೈನ್ ಇನ್ ಮಾಡಿ', usegoogle:'Google ಸೈನ್ ಇನ್ ಬಳಸಿ',
+  qrhelp:'ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಆಪ್ ತೆರೆಯಿರಿ → ⋮ ಮೆನು → ಲಿಂಕ್ ಮಾಡಿದ ಸಾಧನಗಳು → ಸಾಧನ ಲಿಂಕ್ ಮಾಡಿ. ನಂತರ ಈ ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ.',
+  scantitle:'QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ', scanhelp:'ಕಂಪ್ಯೂಟರ್ ಪರದೆಯ ಮೇಲಿನ QR ಕೋಡ್ ಅನ್ನು ಚೌಕದೊಳಗೆ ಇರಿಸಿ.'
+});
+Object.assign(T.en, {
+  qrlogin:'Sign in with QR code', usegoogle:'Use Google sign-in',
+  qrhelp:'On your phone, open the app → ⋮ menu → Linked devices → Link a device. Then scan this code.',
+  scantitle:'Scan QR code', scanhelp:'Point the camera at the QR code shown on the computer screen.'
+});
 const $ = (s) => document.querySelector(s);
 const P = {
   attach:'M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 0 0 5 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z',
@@ -236,19 +267,19 @@ const MAX = 15 * 1024 * 1024;
 let lang = localStorage.lang || 'kn', me = null, chat = null, users = [], contacts = [], reply = null, q = '', filter = 'all', queue = [];
 const store = {}, info = {}, unread = {}, lastSeen = {}, typingAt = {};
 const load = (k, d) => { try { return JSON.parse(localStorage[k]) || d; } catch (e) { return d; } };
-const SYNC = /^(blk|stars|hid|hl|rem|c:.+)$/;
+const SYNC = /^(blk|stars|hid|hl|rem|pin|mute|c:.+)$/;
 const save = (k, v) => { try { localStorage[k] = JSON.stringify(v); } catch (e) {} if (me && SYNC.test(k)) socket.emit('kv', { k, v }); };
 const blocked = new Set(load('blk', [])), starred = new Set(load('stars', [])), hidden = new Set(load('hid', []));
 const t = (k) => T[lang][k] || T.en[k] || k;
 const nameOf = (id) => (info[id] && info[id].name) || '';
-const dm = (a, b) => 'dm:' + [a, b].sort().join('|');
+const dm = (a, b) => /^g:/.test(b) ? 'grp:' + b.slice(2) : 'dm:' + [a, b].sort().join('|');
 const mid = (m) => m.id || m.ts + '-' + m.from;
 const fmt = (ts) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 const size = (n) => (n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB');
 const dayLabel = (ts) => { const d = new Date(ts), n = new Date(); return d.toDateString() === n.toDateString() ? t('today') : d.toDateString() === new Date(n - 864e5).toDateString() ? t('yday') : d.toLocaleDateString(); };
 const toast = (s) => { const x = $('#toast'); x.textContent = s; x.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (x.hidden = true), 2600); };
-const preview = (m) => { if (m.deleted) return t('deleted'); if (!m.file) return m.text || ''; const ty = m.file.type || '', k = ty.startsWith('image/') ? tt('Photo', 'ಫೋಟೋ') : ty.startsWith('video/') ? tt('Video', 'ವೀಡಿಯೊ') : ty.startsWith('audio/') ? t('voice') : m.file.name; return k + (m.text ? ' · ' + m.text : ''); };
-const peerOf = (m) => m.convo.slice(3).split('|').find((x) => x !== me) || m.from;
+const preview = (m) => { if (m.from === 'system') return sysText(m); if (m.deleted) return t('deleted'); if (!m.file) return m.text || ''; const ty = m.file.type || '', k = ty.startsWith('image/') ? tt('Photo', 'ಫೋಟೋ') : ty.startsWith('video/') ? tt('Video', 'ವೀಡಿಯೊ') : ty.startsWith('audio/') ? t('voice') : m.file.name; return k + (m.text ? ' · ' + m.text : ''); };
+const peerOf = (m) => m.convo.startsWith('grp:') ? 'g:' + m.convo.slice(4) : m.convo.slice(3).split('|').find((x) => x !== me) || m.from;
 const linkify = (s) => { const f = document.createDocumentFragment(); s.split(/(https?:\/\/\S+)/g).forEach((p, i) => { if (i % 2) { const a = el('a', '', p); a.href = p; a.target = '_blank'; a.rel = 'noopener'; f.append(a); } else f.append(p); }); return f; };
 function av(u) {
   const d = el('div', 'av'), seed = (u && (u.id || u.name || u.email)) || '';
@@ -258,8 +289,9 @@ function av(u) {
     d.classList.add('mono'); d.textContent = (g(w[0] || '?') + (w.length > 1 ? g(w[1]) : '')).toUpperCase();
     d.style.setProperty('--h', 160 + [...seed].reduce((a, c) => a + c.charCodeAt(0), 0) * 37 % 150);
   }
-  if (u && u.picture) { const i = el('img'); i.src = u.picture; i.alt = ''; i.referrerPolicy = 'no-referrer'; i.onerror = mono; d.append(i); } else mono();
+  if (u && u.picture) { const i = el('img'); avatarSrc(u.picture, i); i.alt = ''; i.referrerPolicy = 'no-referrer'; i.onerror = mono; d.append(i); } else mono();
   if (u && u.id && u.id !== me && users.some((x) => x.id === u.id)) d.classList.add('on');
+  if (u && u.id && stUnseen.has(u.id)) d.classList.add('st');
   return d;
 }
 function addContact(u) {
@@ -284,16 +316,20 @@ function drawList() {
   const L = $('#list'); L.innerHTML = '';
   const s = $('#q').value.toLowerCase();
   const rows = contacts.filter((c) => (c.name || '').toLowerCase().includes(s) && !blocked.has(c.id) && (filter === 'all' || unread[c.id]))
-    .sort((a, b) => (b.lt || 0) - (a.lt || 0));
+    .sort((a, b) => (pinned.has(b.id) - pinned.has(a.id)) || (b.lt || 0) - (a.lt || 0));
   rows.forEach((c) => {
     const b = el('button', 'row' + (c.id === chat ? ' on' : ''));
     const l1 = el('div', 'l1'), l2 = el('div', 'l2');
-    l1.append(el('b', '', c.name || c.email), el('small', '', c.lt ? (new Date(c.lt).toDateString() === new Date().toDateString() ? fmt(c.lt) : dayLabel(c.lt)) : ''));
+    l1.append(el('b', '', (c.name || c.email) + (pinned.has(c.id) ? ' 📌' : '') + (muted.has(c.id) ? ' 🔇' : '')), el('small', '', c.lt ? (new Date(c.lt).toDateString() === new Date().toDateString() ? fmt(c.lt) : dayLabel(c.lt)) : ''));
     { const pv = el('span', 'pv'); if (users.some((u) => u.id === c.id) && !c.lp) pv.append(el('i', 'dot'), t('online')); else pv.textContent = c.lp || ''; l2.append(pv); }
     if (unread[c.id]) l2.append(el('span', 'bd', unread[c.id]));
     const tx = el('div', 't'); tx.append(l1, l2);
     b.append(av(info[c.id] || c), tx);
-    b.onclick = () => openChat(c.id);
+    let lp = 0;
+    b.onclick = (e) => { if (b.dataset.lp) { delete b.dataset.lp; e.stopPropagation(); return; } openChat(c.id); };
+    b.oncontextmenu = (e) => { e.preventDefault(); rowMenu(c, e.clientX, e.clientY); };
+    b.ontouchstart = (e) => { const q0 = e.touches[0]; lp = setTimeout(() => { b.dataset.lp = 1; rowMenu(c, q0.clientX, q0.clientY); }, 550); };
+    b.ontouchend = b.ontouchmove = () => clearTimeout(lp);
     L.append(b);
   });
 }
@@ -305,7 +341,7 @@ function drawHead() {
   $('#cn').textContent = nameOf(chat); $('#cs').classList.toggle('on', users.some((x) => x.id === chat));
   $('#cs').textContent = Date.now() - (typingAt[chat] || 0) < 3000 ? t('typing') : users.some((x) => x.id === chat) ? t('online') : lastSeen[chat] ? t('offline') + ' · ' + fmt(lastSeen[chat]) : t('offline');
 }
-function tick(m) { const s = m.status || 'sent'; const x = el('span', 'tk' + (s === 'read' ? ' rd' : '')); x.innerHTML = ico(s === 'sent' ? 'ck1' : 'ck2'); return x; }
+function tick(m) { const s = tickState(m); const x = el('span', 'tk' + (s === 'read' ? ' rd' : '')); x.innerHTML = ico(s === 'sent' ? 'ck1' : 'ck2'); return x; }
 const urlCache = new Map();
 const fileUrl = (f) => {
   if (typeof f.data === 'string' && /^data:/.test(f.data)) return Promise.resolve(f.data);
@@ -360,7 +396,7 @@ function openChat(id) {
   drawHead(); drawList(); drawLog(true);
   socket.emit('history', { to: 'user:' + id }, (list) => { store[dm(me, id)] = list || []; drawLog(true); markRead(); });
 }
-const markRead = () => chat && socket.emit('read', { to: 'user:' + chat });
+const markRead = () => { if (!chat) return; socket.emit('read', { to: 'user:' + chat }); };
 
 /* ---------- sockets ---------- */
 socket.on('message', (m) => {
@@ -370,8 +406,8 @@ socket.on('message', (m) => {
   const open = chat === peer;
   (store[k] = store[k] || []).push(m);
   if (open) { drawLog(m.from === me); if (m.from !== me) markRead(); }
-  else if (m.from !== me) { unread[peer] = (unread[peer] || 0) + 1; }
-  if (m.from !== me && (document.hidden || !open) && window.Notification && Notification.permission === 'granted') new Notification(m.name || nameOf(peer), { body: preview(m) });
+  else if (m.from !== me && m.from !== 'system') { unread[peer] = (unread[peer] || 0) + 1; }
+  if (m.from !== me && m.from !== 'system' && (document.hidden || !open) && !muted.has(peer) && window.Notification && Notification.permission === 'granted') new Notification(m.name || nameOf(peer), { body: preview(m) });
   drawList();
 });
 socket.on('online', (l) => {
@@ -380,7 +416,7 @@ socket.on('online', (l) => {
   l.forEach((u) => { info[u.id] = Object.assign(info[u.id] || {}, u); if (contacts.some((c) => c.id === u.id)) addContact(u); });
   if (me) { drawHead(); drawList(); }
 });
-socket.on('typing', ({ from }) => { typingAt[from] = Date.now(); drawHead(); setTimeout(drawHead, 3100); });
+socket.on('typing', ({ from, group, name }) => { const k = group || from; typingAt[k] = Date.now(); if (group) tname[k] = name; drawHead(); setTimeout(drawHead, 3100); });
 socket.on('status', ({ convo, status }) => {
   const rank = { sent: 0, delivered: 1, read: 2 };
   (store[convo] || []).forEach((m) => { if (m.from === me && rank[status] > rank[m.status || 'sent']) m.status = status; });
@@ -396,18 +432,22 @@ socket.on('disconnect', (why) => { if (why === 'io server disconnect') { me = nu
 function signIn(auth) {
   socket.connect();
   socket.emit('join', auth, (r) => {
-    if (r.error) { localStorage.removeItem('sess'); if (auth.credential) alert(t('err')); return; }
+    if (r.error) { localStorage.removeItem('sess'); if (auth.credential) alert(t('err')); else if (!$('#qrp').hidden) qrGo(); return; }
     me = r.id; localStorage.setItem('sess', r.session);
     info[me] = Object.assign(info[me] || {}, r.user || { id: me, name: r.name });
     Object.entries(r.kv || {}).forEach(([k, v]) => { try { localStorage[k] = JSON.stringify(v); } catch (e) {} });
-    [[blocked, 'blk'], [starred, 'stars'], [hidden, 'hid']].forEach(([S, k]) => { S.clear(); load(k, []).forEach((x) => S.add(x)); });
-    contacts = load('c:' + me, []); contacts.forEach((c) => (info[c.id] = Object.assign(c, info[c.id] || {})));
+    [[blocked, 'blk'], [starred, 'stars'], [hidden, 'hid'], [pinned, 'pin'], [muted, 'mute']].forEach(([S, k]) => { S.clear(); load(k, []).forEach((x) => S.add(x)); });
+    contacts = load('c:' + me, []).filter((c) => !/^g:/.test(c.id)); contacts.forEach((c) => (info[c.id] = Object.assign(c, info[c.id] || {})));
     (r.recent || []).forEach(({ user, last, unread: n }) => { const c = addContact(user); if (!c.lt || last.ts > c.lt) { c.lt = last.ts; c.lp = preview(last); } if (n) unread[user.id] = n; });
+    (r.groups || []).forEach((G) => { const c = putGroup(G); if (G.last) { c.lt = G.last.ts; c.lp = (G.last.from === me || G.last.from === 'system' || !G.last.name ? '' : G.last.name + ': ') + preview(G.last); } if (G.unread) unread[G.id] = G.unread; });
     $('#login').hidden = true; $('#app').hidden = false;
     if (window.Notification && Notification.permission === 'default') Notification.requestPermission();
-    drawHead(); drawList();
+    drawHead(); drawList(); refreshStatus();
+    if (pendingLink) { const c = pendingLink; pendingLink = ''; askLink(c); }            // opened from a QR code scanned with the phone's own camera
   });
 }
+let pendingLink = (new URLSearchParams(location.search).get('link') || '').replace(/[^\w-]/g, '').slice(0, 40);
+if (pendingLink) { history.replaceState(null, '', location.pathname); if (!localStorage.getItem('sess')) setTimeout(() => toast(tt('Sign in on this phone first, then scan the QR code again.', 'ಮೊದಲು ಈ ಫೋನ್‌ನಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಿ, ನಂತರ QR ಕೋಡ್ ಮತ್ತೆ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ.')), 600); }
 if (localStorage.getItem('sess')) signIn({ session: localStorage.getItem('sess') });
 fetch('/config.json').then((r) => r.json()).then(({ clientId }) => {
   if (!clientId) return ($('#gerr').hidden = false);
@@ -419,7 +459,11 @@ fetch('/config.json').then((r) => r.json()).then(({ clientId }) => {
   };
   document.head.append(s);
 });
-$('#out').onclick = () => { localStorage.removeItem('sess'); if (window.google) google.accounts.id.disableAutoSelect(); location.reload(); };
+$('#out').onclick = () => {
+  let done = false;
+  const fin = () => { if (done) return; done = true; localStorage.removeItem('sess'); if (window.google) google.accounts.id.disableAutoSelect(); location.reload(); };
+  if (socket.connected) { socket.emit('logout', {}, fin); setTimeout(fin, 1500); } else fin();
+};
 document.querySelectorAll('.lang').forEach((b) => (b.onclick = () => { lang = lang === 'kn' ? 'en' : 'kn'; localStorage.lang = lang; labels(); drawHead(); drawList(); drawLog(); }));
 $('#back').onclick = () => { chat = null; $('#app').classList.remove('open'); $('#chat').hidden = true; $('#empty').hidden = false; drawList(); };
 $('#q').oninput = drawList;
@@ -431,6 +475,7 @@ $('#ms').oninput = (e) => { q = e.target.value.toLowerCase(); drawLog(); };
 function drawNew() {
   const s = $('#ns').value.trim(), L = $('#nl'); L.innerHTML = '';
   const row = (u, sub, fn) => { const b = el('button', 'row'); const tx = el('div', 't'); tx.append(el('b', '', u.name || sub), el('span', 'pv', sub)); b.append(av(u), tx); b.onclick = fn; L.append(b); };
+  { const g = el('button', 'row'), x = el('div', 't'); x.append(el('b', '', tt('New group', 'ಹೊಸ ಗುಂಪು')), el('span', 'pv', tt('Chat with many people', 'ಹಲವರೊಂದಿಗೆ ಚಾಟ್'))); g.append(av({ name: '+' }), x); g.onclick = newGroup; L.append(g); }
   if (/^\S+@\S+\.\S+$/.test(s)) row({ name: '@' }, t('start') + ' ' + s, () => socket.emit('find', { email: s }, (r) => { if (r && r.user) startChat(r.user); else toast(t('nf')); }));
   const low = s.toLowerCase();
   users.filter((u) => u.id !== me && ((u.name || '') + (u.email || '')).toLowerCase().includes(low)).forEach((u) => row(u, u.email || t('online'), () => startChat(u)));
@@ -463,18 +508,20 @@ function shrink(file) {
     i.src = u;
   });
 }
+const upMsg = (e) => e.status === 401 ? tt('Session expired. Please sign out and sign in again.', 'ಸೆಷನ್ ಮುಗಿದಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.')
+  : e.status === 413 ? t('big') : e.code ? tt('Upload failed', 'ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಯಿತು') + ' (' + e.code + ')' : '';
 function toData(file, cb) {
   if (file.size > MAX) return toast(t('big'));
   toast(tt('Uploading…', 'ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ…'));
   ((file.type || '').startsWith('image/') ? shrink(file) : Promise.resolve(file))
     .then((f) => {
       const fd = new FormData(); fd.append('file', f, f.name || file.name || 'file');
-      return fetch('/upload', { method: 'POST', body: fd, headers: { 'x-session': localStorage.getItem('sess') || '' } }).then((r) => r.json()).then((j) => {
-        if (!j.key) throw new Error(j.error || 'upload');
+      return xhrUpload(fd).then(({ r, j }) => {
+        if (!j.key) { const e = new Error(j.error || 'http ' + r.status); e.status = r.status; e.code = j.code; throw e; }
         cb({ name: file.name || f.name || 'file', type: f.type || file.type || 'application/octet-stream', size: f.size, key: j.key });
       });
     })
-    .catch(() => toast(tt('Upload failed. Try again.', 'ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಯಿತು. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.')));
+    .catch((e) => toast(upMsg(e) || tt('Upload failed. Try again.', 'ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಯಿತು. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.')));
 }
 $('#f').onsubmit = (e) => {
   e.preventDefault();
@@ -620,7 +667,7 @@ const opts = (sel, list) => list.forEach(([v, l]) => { const o = el('option', ''
 const applyTheme = () => { localStorage.theme ? (document.documentElement.dataset.theme = localStorage.theme) : delete document.documentElement.dataset.theme; }; applyTheme();
 $('#mn').onclick = (e) => {
   e.stopPropagation();
-  const items = [[tt('Health', 'ಆರೋಗ್ಯ'), health], [tt('Starred messages', 'ನಕ್ಷತ್ರ ಸಂದೇಶಗಳು'), starredView], [tt('Search all chats', 'ಎಲ್ಲಾ ಚಾಟ್ ಹುಡುಕಿ'), searchAll], [tt('Settings', 'ಸೆಟ್ಟಿಂಗ್ಸ್'), settings]];
+  const items = [[tt('Health', 'ಆರೋಗ್ಯ'), health], [tt('New group', 'ಹೊಸ ಗುಂಪು'), newGroup], [tt('Status', 'ಸ್ಟೇಟಸ್'), statuses], [tt('Starred messages', 'ನಕ್ಷತ್ರ ಸಂದೇಶಗಳು'), starredView], [tt('Search all chats', 'ಎಲ್ಲಾ ಚಾಟ್ ಹುಡುಕಿ'), searchAll], [tt('Linked devices', 'ಲಿಂಕ್ ಮಾಡಿದ ಸಾಧನಗಳು'), devices], [tt('Settings', 'ಸೆಟ್ಟಿಂಗ್ಸ್'), settings]];
   const p = $('#pop'); p.innerHTML = ''; items.forEach(([l, f]) => { const b = el('button', '', l); b.onclick = f; p.append(b); });
   p.hidden = false; p.style.left = Math.max(4, Math.min(e.clientX, innerWidth - 190)) + 'px'; p.style.top = e.clientY + 'px';
 };
@@ -661,13 +708,349 @@ function settings() {
   opts(ds, [[0, tt('Off', 'ಆಫ್')], [24, '24 h'], [168, '7 d']]); ds.value = localStorage.dis || 0; ds.onchange = () => { localStorage.dis = ds.value; drawLog(); };
   pn.type = 'password'; pn.inputMode = 'numeric'; pn.placeholder = tt('New PIN (empty = remove)', 'ಹೊಸ PIN (ಖಾಲಿ = ತೆಗೆಯಿರಿ)');
   ps.onclick = () => { pn.value ? (localStorage.pin = pn.value) : localStorage.removeItem('pin'); toast('✓'); };
-  sheet(tt('Settings', 'ಸೆಟ್ಟಿಂಗ್ಸ್'), lab(tt('Theme', 'ಥೀಮ್'), th), lab(tt('Disappearing messages (hidden on this device)', 'ಮಾಯವಾಗುವ ಸಂದೇಶಗಳು'), ds), lab(tt('Chat lock', 'ಚಾಟ್ ಲಾಕ್'), pn, ps), lab(tt('Blocked', 'ಬ್ಲಾಕ್ ಮಾಡಿದವರು'), ...[...blocked].map((id) => row2(nameOf(id) || id, tt('Tap to unblock', 'ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಲು ಒತ್ತಿ'), () => { blocked.delete(id); save('blk', [...blocked]); settings(); drawList(); }))));
+  sheet(tt('Settings', 'ಸೆಟ್ಟಿಂಗ್ಸ್'), profileBlock(), lab(tt('Theme', 'ಥೀಮ್'), th), lab(tt('Disappearing messages (hidden on this device)', 'ಮಾಯವಾಗುವ ಸಂದೇಶಗಳು'), ds), lab(tt('Chat lock', 'ಚಾಟ್ ಲಾಕ್'), pn, ps), lab(tt('Blocked', 'ಬ್ಲಾಕ್ ಮಾಡಿದವರು'), ...[...blocked].map((id) => row2(nameOf(id) || id, tt('Tap to unblock', 'ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಲು ಒತ್ತಿ'), () => { blocked.delete(id); save('blk', [...blocked]); settings(); drawList(); }))));
 }
 const lock = () => { $('#lkt').textContent = tt('Enter PIN', 'PIN ನಮೂದಿಸಿ'); $('#lkb').textContent = tt('Unlock', 'ತೆರೆಯಿರಿ'); $('#lki').value = ''; $('#lk').hidden = false; $('#lki').focus(); };
 $('#lkb').onclick = () => { if ($('#lki').value === localStorage.pin) $('#lk').hidden = true; else { $('#lkt').textContent = tt('Wrong PIN', 'ತಪ್ಪು PIN'); $('#lki').value = ''; } };
 $('#lki').onkeydown = (e) => e.key === 'Enter' && $('#lkb').onclick();
 if (localStorage.pin) lock();
 document.addEventListener('visibilitychange', () => document.hidden && localStorage.pin && lock());
+
+/* ---------- profile (settings) + status ---------- */
+const pickFile = (accept, cb) => { const i = document.createElement('input'); i.type = 'file'; i.accept = accept; i.onchange = () => i.files[0] && cb(i.files[0]); i.click(); };
+socket.on('profile', (u) => {
+  info[u.id] = Object.assign(info[u.id] || {}, u, { picture: u.picture || undefined });
+  const c = contacts.find((x) => x.id === u.id);
+  if (c) { Object.assign(c, { name: u.name, picture: u.picture || undefined }); save('c:' + me, contacts); }
+  drawHead(); drawList();
+});
+$('#myav').style.cursor = 'pointer'; $('#myav').onclick = settings;
+function profileBlock() {
+  const u = info[me] || {}, box = el('div'), a = av(u), btns = el('div');
+  box.style.cssText = 'display:grid;gap:10px;justify-items:center;padding:6px 0 14px;border-bottom:1px solid var(--line)';
+  a.style.cssText += ';width:96px;height:96px;font-size:1.8rem;cursor:pointer';
+  btns.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;justify-content:center';
+  const ch = el('button', 'pb', tt('Change photo', 'ಫೋಟೋ ಬದಲಿಸಿ')), rm = el('button', 'alt', tt('Remove photo', 'ಫೋಟೋ ತೆಗೆಯಿರಿ')), nm = el('input'), ab = el('input'), sv = el('button', 'pb', tt('Save profile', 'ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ'));
+  rm.style.width = 'auto'; sv.style.width = '100%';
+  const done = (r) => { if (r && r.ok) { toast('✓'); settings(); } else toast(tt('Could not update profile', 'ಪ್ರೊಫೈಲ್ ಬದಲಾಯಿಸಲಾಗಲಿಲ್ಲ')); };
+  ch.onclick = a.onclick = () => pickFile('image/*', (f) => toData(f, (r) => socket.emit('profile:update', { picture: r.key }, done)));
+  rm.onclick = () => socket.emit('profile:update', { picture: null }, done);
+  nm.value = u.name || ''; nm.maxLength = 60; nm.placeholder = tt('Your name', 'ನಿಮ್ಮ ಹೆಸರು');
+  ab.value = u.about || ''; ab.maxLength = 140; ab.placeholder = tt('About', 'ನಿಮ್ಮ ಬಗ್ಗೆ');
+  sv.onclick = () => socket.emit('profile:update', { name: nm.value, about: ab.value }, done);
+  btns.append(ch, ...(u.picture ? [rm] : []));
+  const wrap = (x) => { x.style.width = '100%'; return x; };
+  box.append(a, btns, wrap(nm), wrap(ab), sv);
+  return box;
+}
+function statuses() {
+  socket.emit('status:list', {}, (list) => {
+    const by = {};
+    (list || []).forEach((s) => (by[s.user.id] = by[s.user.id] || { user: s.user, items: [] }).items.push(s));
+    const add = el('button', 'pb', tt('Add status', 'ಸ್ಟೇಟಸ್ ಸೇರಿಸಿ')); add.onclick = statusAdd;
+    const rows = [];
+    if (by[me]) rows.push(statusRow(by[me], tt('My status', 'ನನ್ನ ಸ್ಟೇಟಸ್')));
+    Object.values(by).filter((g) => g.user.id !== me).sort((x, y) => (x.items.every((s) => s.seen) - y.items.every((s) => s.seen)) || y.items[y.items.length - 1].ts - x.items[x.items.length - 1].ts).forEach((g) => rows.push(statusRow(g)));
+    sheet(tt('Status', 'ಸ್ಟೇಟಸ್'), add, ...(rows.length ? rows : [el('p', 'note', tt('No status updates yet', 'ಇನ್ನೂ ಸ್ಟೇಟಸ್ ಇಲ್ಲ'))]));
+  });
+}
+function statusRow(g, title) {
+  const r = el('button', 'row'), x = el('div', 't'), last = g.items[g.items.length - 1], a = av(g.user);
+  a.style.boxShadow = '0 0 0 2px var(--panel),0 0 0 4px ' + (g.items.every((s) => s.seen) ? 'var(--line)' : 'var(--pri)');
+  x.append(el('b', '', title || g.user.name), el('span', 'pv', g.items.length + ' · ' + dayLabel(last.ts) + ' ' + fmt(last.ts)));
+  r.append(a, x); r.onclick = () => statusView(g); return r;
+}
+function statusView(g) {
+  let i = Math.max(0, g.items.findIndex((s) => !s.seen)), tm = 0, gone = false;
+  const ov = el('div'); ov.style.cssText = 'position:fixed;inset:0;z-index:4;background:#000;color:#fff;display:flex;flex-direction:column';
+  document.body.append(ov);
+  const close = () => { clearTimeout(tm); ov.remove(); refreshStatus(); if (gone) statuses(); };
+  const next = () => { i++; i >= g.items.length ? close() : show(); }, prev = () => { i = Math.max(0, i - 1); show(); };
+  function show() {
+    clearTimeout(tm); const s = g.items[i], mine = g.user.id === me; ov.innerHTML = '';
+    const bars = el('div'), top = el('div'), body = el('div'), foot = el('div'), x = el('button', '', '✕'), who = el('b', '', (mine ? tt('My status', 'ನನ್ನ ಸ್ಟೇಟಸ್') : g.user.name) + ' · ' + fmt(s.ts));
+    bars.style.cssText = 'display:flex;gap:4px;padding:calc(10px + env(safe-area-inset-top,0px)) 10px 6px';
+    g.items.forEach((_, k) => { const p = el('div'); p.style.cssText = 'flex:1;height:3px;border-radius:2px;background:' + (k <= i ? '#fff' : '#ffffff55'); bars.append(p); });
+    top.style.cssText = 'display:flex;align-items:center;gap:10px;padding:4px 12px'; who.style.flex = 1; x.style.color = '#fff'; x.onclick = close; top.append(av(g.user), who, x);
+    body.style.cssText = 'flex:1;display:grid;place-items:center;gap:12px;padding:12px;min-height:0;overflow:auto'; body.onclick = (e) => (e.clientX < innerWidth / 3 ? prev() : next());
+    let timed = true;
+    if (s.file) {
+      const f = fileEl(s.file); f.onclick = null; f.style.cssText = 'max-width:100%;max-height:68dvh;width:auto;margin:0;cursor:default';
+      if (f.tagName === 'VIDEO') { timed = false; f.controls = false; f.autoplay = true; f.onended = next; f.onloadeddata = () => f.play().catch(() => { f.muted = true; f.play(); }); }
+      body.append(f);
+    }
+    if (s.text) { const p = el('div', '', s.text); p.style.cssText = 'font-size:1.35rem;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%'; body.append(p); }
+    foot.style.cssText = 'display:flex;justify-content:center;gap:10px;padding:8px 12px calc(14px + env(safe-area-inset-bottom,0px))';
+    if (mine) {
+      const sb = el('button', 'alt', '👁 ' + (s.views || 0)), db = el('button', 'alt', '🗑'); sb.style.cssText = db.style.cssText = 'width:auto;color:#fff;padding:.5rem 1rem';
+      sb.onclick = (e) => { e.stopPropagation(); clearTimeout(tm); socket.emit('status:viewers', { id: s.id }, (l) => sheet(tt('Seen by', 'ನೋಡಿದವರು'), ...((l || []).length ? l.map((v) => { const r = el('div', 'row'), t2 = el('div', 't'); r.style.cursor = 'default'; t2.append(el('b', '', v.name), el('span', 'pv', dayLabel(v.ts) + ' ' + fmt(v.ts))); r.append(av(v), t2); return r; }) : [el('p', 'note', tt('No views yet', 'ಇನ್ನೂ ಯಾರೂ ನೋಡಿಲ್ಲ'))]))); };
+      db.onclick = () => { clearTimeout(tm); socket.emit('status:delete', { id: s.id }, () => { gone = true; g.items.splice(i, 1); if (!g.items.length) return close(); i = Math.min(i, g.items.length - 1); show(); }); };
+      foot.append(sb, db);
+    } else {
+      socket.emit('status:seen', { id: s.id }); s.seen = true;
+      const ri = el('input'), rb = el('button', 'pb', tt('Send', 'ಕಳುಹಿಸಿ'));
+      ri.placeholder = tt('Reply…', 'ಉತ್ತರಿಸಿ…'); ri.maxLength = 500; ri.style.cssText = 'flex:1;background:#ffffff1f;color:#fff;border-color:#ffffff40'; ri.onfocus = () => clearTimeout(tm);
+      const sendReply = () => { const v = ri.value.trim(); if (!v) return; send({ text: v, replyTo: { id: s.id, name: tt('Status', 'ಸ್ಟೇಟಸ್'), text: (s.text || preview({ file: s.file })).slice(0, 100) } }, g.user.id); toast('✓'); next(); };
+      rb.onclick = sendReply; ri.onkeydown = (e) => e.key === 'Enter' && sendReply(); foot.append(ri, rb);
+    }
+    ov.append(bars, top, body, foot);
+    if (timed) tm = setTimeout(next, 5000);
+  }
+  show();
+}
+function statusAdd() {
+  let file = null;
+  const tx = el('input'), pk = el('button', 'alt', tt('Add photo or video', 'ಫೋಟೋ / ವೀಡಿಯೊ ಸೇರಿಸಿ')), du = el('select'), cu = el('input'), post = el('button', 'pb', tt('Post status', 'ಸ್ಟೇಟಸ್ ಹಾಕಿ'));
+  tx.placeholder = tt('Write a status…', 'ಸ್ಟೇಟಸ್ ಬರೆಯಿರಿ…'); tx.maxLength = 700;
+  pk.onclick = () => pickFile('image/*,video/*', (f) => toData(f, (r) => { file = r; pk.textContent = '✓ ' + r.name; }));
+  opts(du, [[24, '24 ' + tt('hours', 'ಗಂಟೆ')], [48, '48 ' + tt('hours', 'ಗಂಟೆ')], ['custom', tt('Custom hours', 'ಬೇರೆ ಗಂಟೆ')]]);
+  cu.type = 'number'; cu.min = 1; cu.max = 168; cu.value = 72; cu.hidden = true; cu.placeholder = tt('Hours (1 to 168)', 'ಗಂಟೆ (1 ರಿಂದ 168)');
+  du.onchange = () => { cu.hidden = du.value !== 'custom'; };
+  post.onclick = () => {
+    const h = du.value === 'custom' ? Math.round(+cu.value) : +du.value;
+    if (!(h >= 1 && h <= 168)) return toast(tt('Enter 1 to 168 hours', '1 ರಿಂದ 168 ಗಂಟೆ ನಮೂದಿಸಿ'));
+    if (!file && !tx.value.trim()) return toast(tt('Add text, a photo or a video', 'ಪಠ್ಯ, ಫೋಟೋ ಅಥವಾ ವೀಡಿಯೊ ಸೇರಿಸಿ'));
+    post.disabled = true;
+    socket.emit('status:post', { text: tx.value, file, hours: h }, (r) => { if (r && r.ok) { toast('✓'); statuses(); } else { post.disabled = false; toast(tt('Could not post status', 'ಸ್ಟೇಟಸ್ ಹಾಕಲಾಗಲಿಲ್ಲ')); } });
+  };
+  sheet(tt('New status', 'ಹೊಸ ಸ್ಟೇಟಸ್'), tx, pk, lab(tt('Show status for', 'ಸ್ಟೇಟಸ್ ಎಷ್ಟು ಸಮಯ ಇರಬೇಕು'), du, cu), post);
+}
+
+/* ---------- groups (any user can create one) ---------- */
+const isG = (x) => /^g:/.test(x || '');
+function putGroup(G) {
+  info[G.id] = Object.assign(info[G.id] || {}, G); info[G.id].picture = G.picture;
+  let c = contacts.find((x) => x.id === G.id); if (!c) contacts.push((c = { id: G.id, lt: Date.now(), lp: tt('Group created', 'ಗುಂಪು ರಚಿಸಲಾಗಿದೆ') }));
+  c.name = G.name; c.group = true; save('c:' + me, contacts); return c;
+}
+socket.on('group', (G) => { putGroup(G); drawHead(); drawList(); });
+socket.on('group:gone', ({ id }) => {
+  contacts = contacts.filter((c) => c.id !== id); delete info[id]; save('c:' + me, contacts);
+  if (chat === id) { chat = null; $('#chat').hidden = true; $('#empty').hidden = false; $('#app').classList.remove('open'); }
+  $('#sh').hidden = true; drawList();
+});
+const _drawHead = drawHead;
+drawHead = () => {
+  _drawHead(); const g = isG(chat); $('#ac').hidden = $('#vc').hidden = g;
+  if (g) { const G = info[chat] || {}; $('#cs').classList.remove('on'); $('#cs').textContent = Date.now() - (typingAt[chat] || 0) < 3000 ? (tname[chat] || '') + ' ' + t('typing') : (G.members ? G.members.length : 0) + ' ' + tt('members', 'ಸದಸ್ಯರು'); }
+};
+const _bubble = bubble;
+bubble = (m) => {
+  if (m.from === 'system') { const d = el('div', 'day', sysText(m)); d.style.cssText = 'max-width:90%;text-align:center'; return d; }
+  const b = _bubble(m);
+  if (isG(chat) && m.from !== me && !m.deleted) { const n = el('b', '', m.name || nameOf(m.from)); n.style.cssText = 'display:block;font-size:.78rem;color:var(--pri);margin-bottom:2px'; b.prepend(n); }
+  return b;
+};
+$('#ct').style.cursor = $('#cav').style.cursor = 'pointer'; $('#ct').onclick = $('#cav').onclick = () => isG(chat) && groupInfo();
+function sysText(m) {
+  let d = {}; try { d = JSON.parse(m.text); } catch (e) {}
+  const a = d.a || '', b = d.b || '';
+  return ({ create: tt(a + ' created the group', a + ' ಗುಂಪು ರಚಿಸಿದರು'), add: tt(a + ' added ' + b, a + ' ' + b + ' ಅವರನ್ನು ಸೇರಿಸಿದರು'), remove: tt(a + ' removed ' + b, a + ' ' + b + ' ಅವರನ್ನು ತೆಗೆದರು'), left: tt(a + ' left', a + ' ಗುಂಪು ಬಿಟ್ಟರು'), challenge: tt(a + ' started a challenge: ' + b, a + ' ಸವಾಲು ಆರಂಭಿಸಿದರು: ' + b), rename: tt(a + ' renamed the group to “' + b + '”', a + ' ಗುಂಪಿನ ಹೆಸರನ್ನು “' + b + '” ಎಂದು ಬದಲಿಸಿದರು') })[d.k] || '';
+}
+function groupPicker(title, existing, withName, done) {
+  const nm = el('input'), em = el('input'), eb = el('button', 'alt', tt('Add by email', 'ಇಮೇಲ್ ಮೂಲಕ ಸೇರಿಸಿ')), L = el('div'), go = el('button', 'pb', tt('Done', 'ಮುಗಿಯಿತು')), sel = new Set(), pool = new Map();
+  nm.placeholder = tt('Group name', 'ಗುಂಪಿನ ಹೆಸರು'); nm.maxLength = 60; em.type = 'email'; em.placeholder = t('email');
+  function draw() {
+    L.innerHTML = '';
+    [...pool.values()].forEach((u) => {
+      const r = el('label', 'row'), cb = el('input'), x = el('div', 't'); cb.type = 'checkbox'; cb.checked = sel.has(u.id); cb.style.cssText = 'width:20px;height:20px;padding:0;flex:none';
+      cb.onchange = () => (cb.checked ? sel.add(u.id) : sel.delete(u.id));
+      x.append(el('b', '', u.name || u.email), el('span', 'pv', u.email || '')); r.append(cb, av(u), x); L.append(r);
+    });
+  }
+  const add = (u) => { if (u && u.id !== me && !isG(u.id) && !existing.includes(u.id) && !blocked.has(u.id)) pool.set(u.id, u); };
+  contacts.forEach(add); users.forEach(add); draw();
+  eb.onclick = () => socket.emit('find', { email: em.value.trim() }, (r) => { if (r && r.user && r.user.id !== me && !existing.includes(r.user.id)) { add(r.user); sel.add(r.user.id); em.value = ''; draw(); } else toast(t('nf')); });
+  go.onclick = () => { if (withName && !nm.value.trim()) return toast(tt('Enter a group name', 'ಗುಂಪಿನ ಹೆಸರು ನಮೂದಿಸಿ')); done(nm.value.trim(), [...sel]); };
+  sheet(title, ...(withName ? [nm] : []), em, eb, L, go);
+}
+function newGroup() {
+  $('#pop').hidden = true;
+  groupPicker(tt('New group', 'ಹೊಸ ಗುಂಪು'), [], true, (name, ids) => socket.emit('group:create', { name, members: ids }, (r) => {
+    if (r && r.ok) { $('#sh').hidden = true; $('#nm').hidden = true; openChat(r.id); }
+    else toast(r && r.error === 'limit' ? tt('Group limit reached', 'ಗುಂಪುಗಳ ಮಿತಿ ತಲುಪಿದೆ') : tt('Could not create group', 'ಗುಂಪು ರಚಿಸಲಾಗಲಿಲ್ಲ'));
+  }));
+}
+function groupInfo() {
+  const id = chat, G = info[id]; if (!G || !G.members) return;
+  const admin = (G.members.find((m) => m.id === me) || {}).role === 'admin', out = [], big = av(G); big.style.cssText += ';width:84px;height:84px;margin:0 auto;font-size:1.6rem'; out.push(big);
+  if (admin) {
+    const nm = el('input'), sv = el('button', 'pb', tt('Rename group', 'ಹೆಸರು ಬದಲಿಸಿ')), ad = el('button', 'pb', tt('Add members', 'ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ'));
+    nm.value = G.name; nm.maxLength = 60;
+    sv.onclick = () => nm.value.trim() && socket.emit('group:rename', { id, name: nm.value }, () => { toast('✓'); groupInfo(); });
+    ad.onclick = () => groupPicker(tt('Add members', 'ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ'), G.members.map((m) => m.id), false, (n, ids) => ids.length ? socket.emit('group:add', { id, members: ids }, groupInfo) : groupInfo());
+    const ph = el('button', 'alt', tt('Change group photo', 'ಗುಂಪಿನ ಫೋಟೋ ಬದಲಿಸಿ')), rp = el('button', 'alt', tt('Remove group photo', 'ಗುಂಪಿನ ಫೋಟೋ ತೆಗೆಯಿರಿ'));
+    ph.onclick = () => pickFile('image/*', (f) => toData(f, (r) => socket.emit('group:photo', { id, picture: r.key }, groupInfo)));
+    rp.onclick = () => socket.emit('group:photo', { id, picture: null }, groupInfo);
+    out.push(ph, ...(G.picture ? [rp] : []), nm, sv, ad);
+  }
+  G.members.forEach((m) => {
+    const r = el('div', 'row'), x = el('div', 't'); r.style.cursor = 'default';
+    x.append(el('b', '', m.id === me ? tt('You', 'ನೀವು') : m.name), el('span', 'pv', m.role === 'admin' ? tt('Admin', 'ಅಡ್ಮಿನ್') : m.email || '')); r.append(av(m), x);
+    const own = G.created_by === me;
+    if (own && m.id !== me) { const b = el('button', 'alt', m.role === 'admin' ? tt('Remove admin', 'ಅಡ್ಮಿನ್ ತೆಗೆ') : tt('Make admin', 'ಅಡ್ಮಿನ್ ಮಾಡಿ')); b.style.cssText = 'width:auto;padding:.4rem .6rem'; b.onclick = () => socket.emit('group:role', { id, member: m.id, role: m.role === 'admin' ? 'member' : 'admin' }, groupInfo); r.append(b); }
+    if (admin && m.id !== me && (own || m.role !== 'admin')) { const b = el('button', 'pb', tt('Remove', 'ತೆಗೆಯಿರಿ')); b.style.padding = '.4rem .8rem'; b.onclick = () => socket.emit('group:remove', { id, member: m.id }, groupInfo); r.append(b); }
+    out.push(r);
+  });
+  const lv = el('button', 'alt', tt('Leave group', 'ಗುಂಪು ಬಿಡಿ')); lv.onclick = () => confirm(tt('Leave this group?', 'ಈ ಗುಂಪನ್ನು ಬಿಡಬೇಕೇ?')) && socket.emit('group:leave', { id });
+  const cb = el('button', 'pb', '🏆 ' + tt('Challenges', 'ಸವಾಲುಗಳು')); cb.onclick = () => challenges(id); out.splice(1, 0, cb);
+  sheet(G.name + ' · ' + G.members.length, ...out, lv);
+}
+
+/* ---------- tick states, typing names, pin / mute, avatars, upload progress ---------- */
+const tname = {}, pinned = new Set(load('pin', [])), muted = new Set(load('mute', [])), avCache = new Map();
+socket.on('gmarks', ({ id, marks }) => {
+  const G = info[id]; if (!G || !G.members) return;
+  marks.forEach((k) => { const m = G.members.find((x) => x.id === k.id); if (m) { m.d = k.d; m.r = k.r; } });
+  if (chat === id) drawLog();
+});
+function tickState(m) {
+  if (m.convo && m.convo.startsWith('grp:')) {
+    const G = info['g:' + m.convo.slice(4)], o = ((G && G.members) || []).filter((x) => x.id !== me);
+    return o.length && o.every((x) => x.r >= m.ts) ? 'read' : o.length && o.every((x) => x.d >= m.ts) ? 'delivered' : 'sent';
+  }
+  return m.status || 'sent';
+}
+const tog = (S, k, id) => { S.has(id) ? S.delete(id) : S.add(id); save(k, [...S]); drawList(); };
+function rowMenu(c, x, y) {
+  const p = $('#pop'); p.innerHTML = '';
+  [[pinned.has(c.id) ? tt('Unpin chat', 'ಪಿನ್ ತೆಗೆಯಿರಿ') : tt('Pin chat', 'ಪಿನ್ ಮಾಡಿ'), () => tog(pinned, 'pin', c.id)], [muted.has(c.id) ? tt('Unmute', 'ಮ್ಯೂಟ್ ತೆಗೆಯಿರಿ') : tt('Mute', 'ಮ್ಯೂಟ್ ಮಾಡಿ'), () => tog(muted, 'mute', c.id)]]
+    .forEach(([l, f]) => { const b = el('button', '', l); b.onclick = f; p.append(b); });
+  p.hidden = false; p.style.left = Math.max(4, Math.min(x, innerWidth - 190)) + 'px'; p.style.top = y + 'px';
+}
+function avatarSrc(pic, img) {                                   // our own photos need the session, so the link is fetched first
+  if (!/^\/avatar\//.test(pic)) { img.src = pic; return; }
+  if (!avCache.has(pic)) {
+    avCache.set(pic, fetch('/avatar-url?k=' + encodeURIComponent(pic.slice(8)), { headers: { 'x-session': localStorage.getItem('sess') || '' } }).then((r) => r.json()).then((j) => { if (!j.url) throw 0; return j.url; }).catch((e) => { avCache.delete(pic); throw e; }));
+    setTimeout(() => avCache.delete(pic), 10 * 60 * 1000);
+  }
+  avCache.get(pic).then((u) => (img.src = u)).catch(() => img.onerror && img.onerror());
+}
+function xhrUpload(fd) {
+  return new Promise((ok, no) => {
+    const x = new XMLHttpRequest(); x.open('POST', '/upload'); x.setRequestHeader('x-session', localStorage.getItem('sess') || '');
+    x.upload.onprogress = (e) => e.lengthComputable && toast(tt('Uploading… ', 'ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ… ') + Math.round(e.loaded / e.total * 100) + '%');
+    x.onload = () => { let j = {}; try { j = JSON.parse(x.responseText); } catch (e) {} ok({ r: { status: x.status }, j }); };
+    x.onerror = () => no(new Error('network')); x.send(fd);
+  });
+}
+
+/* ---------- status ring (unseen updates) + group challenges ---------- */
+let stUnseen = new Set();
+function refreshStatus() {
+  socket.emit('status:list', {}, (l) => { stUnseen = new Set(); (l || []).forEach((s) => { if (s.user.id !== me && !s.seen) stUnseen.add(s.user.id); }); drawList(); drawHead(); });
+}
+socket.on('status:new', refreshStatus); setInterval(() => me && refreshStatus(), 10 * 60 * 1000);
+function challenges(id) {
+  socket.emit('challenge:list', { id }, (list) => {
+    const G = info[id] || {}, admin = ((G.members || []).find((m) => m.id === me) || {}).role === 'admin', today = ymd(new Date()), out = [];
+    if (admin) { const nb = el('button', 'pb', tt('New challenge', 'ಹೊಸ ಸವಾಲು')); nb.onclick = () => challengeNew(id); out.push(nb); }
+    out.push(el('p', 'note', tt('Only your total for a challenge you join is shown to the group.', 'ನೀವು ಸೇರಿದ ಸವಾಲಿನ ನಿಮ್ಮ ಒಟ್ಟು ಮಾತ್ರ ಗುಂಪಿಗೆ ಕಾಣಿಸುತ್ತದೆ.')));
+    (list || []).forEach((c) => {
+      const box = el('div'), unit = c.metric === 'water' ? tt('glasses', 'ಲೋಟ') : tt('steps', 'ಹೆಜ್ಜೆ'), act = el('div');
+      box.style.cssText = 'display:grid;gap:8px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--hd)'; act.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+      const st = today < c.start ? tt('Starts ', 'ಆರಂಭ ') + c.start : today > c.end ? tt('Ended', 'ಮುಗಿದಿದೆ') : tt('Ends ', 'ಮುಗಿಯುವುದು ') + c.end;
+      box.append(el('b', '', c.title), el('small', '', c.goal + ' ' + unit + ' / ' + tt('day', 'ದಿನ') + ' · ' + c.start + ' → ' + c.end + ' · ' + st));
+      c.board.forEach((r, i) => {
+        const row = el('div'), a = av(r), nm = el('span', '', (i + 1) + '. ' + (r.id === me ? tt('You', 'ನೀವು') : r.name));
+        row.style.cssText = 'display:flex;align-items:center;gap:8px'; a.style.width = a.style.height = '30px'; nm.style.flex = 1;
+        row.append(a, nm, el('b', '', r.total + ' ' + unit), el('small', '', '🏅' + r.days)); box.append(row);
+      });
+      if (!c.board.length) box.append(el('small', '', tt('No one has joined yet', 'ಯಾರೂ ಸೇರಿಲ್ಲ')));
+      const jb = el('button', c.joined ? 'alt' : 'pb', c.joined ? tt('Leave', 'ಬಿಡಿ') : tt('Join', 'ಸೇರಿ')); jb.style.width = 'auto'; jb.onclick = () => socket.emit('challenge:join', { cid: c.id, join: !c.joined }, () => challenges(id)); act.append(jb);
+      if (c.joined && today <= c.end) { const hb = el('button', 'alt', tt('Update my numbers', 'ನನ್ನ ಅಂಕಿ ಬದಲಿಸಿ')); hb.style.width = 'auto'; hb.onclick = health; act.append(hb); }
+      if (admin) { const db = el('button', 'alt', '🗑'); db.style.width = 'auto'; db.onclick = () => confirm(tt('Delete this challenge?', 'ಈ ಸವಾಲು ಅಳಿಸಬೇಕೇ?')) && socket.emit('challenge:delete', { cid: c.id }, () => challenges(id)); act.append(db); }
+      box.append(act); out.push(box);
+    });
+    if (!(list || []).length) out.push(el('p', 'note', tt('No challenges yet', 'ಇನ್ನೂ ಸವಾಲುಗಳಿಲ್ಲ')));
+    sheet(tt('Challenges', 'ಸವಾಲುಗಳು') + ' · ' + (G.name || ''), ...out);
+  });
+}
+function challengeNew(id) {
+  const ti = el('input'), mt = el('select'), gl = el('input'), dy = el('select'), cu = el('input'), ok = el('button', 'pb', tt('Start challenge', 'ಸವಾಲು ಆರಂಭಿಸಿ'));
+  ti.placeholder = tt('Challenge name', 'ಸವಾಲಿನ ಹೆಸರು'); ti.maxLength = 60;
+  opts(mt, [['steps', tt('Steps', 'ಹೆಜ್ಜೆ')], ['water', tt('Water (glasses)', 'ನೀರು (ಲೋಟ)')]]);
+  gl.type = 'number'; gl.min = 1; gl.value = 10000; mt.onchange = () => { gl.value = mt.value === 'water' ? 8 : 10000; };
+  opts(dy, [[7, '7 ' + tt('days', 'ದಿನ')], [14, '14 ' + tt('days', 'ದಿನ')], [30, '30 ' + tt('days', 'ದಿನ')], ['custom', tt('Custom', 'ಬೇರೆ')]]);
+  cu.type = 'number'; cu.min = 1; cu.max = 90; cu.value = 10; cu.hidden = true; dy.onchange = () => (cu.hidden = dy.value !== 'custom');
+  ok.onclick = () => {
+    const n = dy.value === 'custom' ? +cu.value : +dy.value;
+    if (!ti.value.trim() || !(+gl.value >= 1) || !(n >= 1 && n <= 90)) return toast(tt('Fill name, goal and days (1 to 90)', 'ಹೆಸರು, ಗುರಿ, ದಿನ (1 ರಿಂದ 90) ತುಂಬಿ'));
+    socket.emit('challenge:create', { id, title: ti.value, metric: mt.value, goal: +gl.value, days: n, start: ymd(new Date()) }, (r) => (r && r.ok ? challenges(id) : toast(tt('Could not create challenge', 'ಸವಾಲು ರಚಿಸಲಾಗಲಿಲ್ಲ'))));
+  };
+  sheet(tt('New challenge', 'ಹೊಸ ಸವಾಲು'), ti, lab(tt('What to track', 'ಏನು ಎಣಿಸಬೇಕು'), mt), lab(tt('Daily goal', 'ದಿನದ ಗುರಿ'), gl), lab(tt('Length', 'ಅವಧಿ'), dy, cu), ok);
+}
+
+/* ---------- QR sign-in (computer) ---------- */
+let qrTimer = 0;
+function qrGo() {
+  socket.emit('qr:create', { origin: location.origin }, (r) => {
+    if ($('#qrp').hidden) return;
+    clearTimeout(qrTimer);
+    if (!r || !r.svg) { $('#qrimg').textContent = tt('Could not load. Retrying…', 'ಲೋಡ್ ಆಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ…'); qrTimer = setTimeout(qrGo, 8000); return; }
+    $('#qrimg').innerHTML = r.svg;
+    qrTimer = setTimeout(qrGo, Math.max(10000, r.ttl - 8000));                           // a fresh code before the old one expires
+  });
+}
+$('#qrb').onclick = () => { $('#qrp').hidden = false; $('#qrb').hidden = $('#gbtn').hidden = true; $('#qrimg').textContent = '…'; qrGo(); };
+$('#qrx').onclick = () => { clearTimeout(qrTimer); socket.emit('qr:cancel'); $('#qrp').hidden = true; $('#qrb').hidden = $('#gbtn').hidden = false; };
+socket.on('qr:done', ({ session }) => { clearTimeout(qrTimer); signIn({ session }); });
+socket.on('connect', () => { if (!$('#qrp').hidden && !me) qrGo(); });
+socket.on('revoked', () => { localStorage.removeItem('sess'); location.reload(); });  // logged out from another device
+
+/* ---------- linked devices (phone) ---------- */
+let scanStream = null, scanTimer = 0;
+function stopScan() { clearTimeout(scanTimer); $('#scan').hidden = true; if (scanStream) scanStream.getTracks().forEach((x) => x.stop()); scanStream = null; $('#scv').srcObject = null; }
+$('#scx').onclick = stopScan;
+async function scanLink() {
+  $('#sh').hidden = true;
+  if (!window.jsQR) await new Promise((ok) => { const x = document.createElement('script'); x.src = '/vendor/jsqr.js'; x.onload = x.onerror = ok; document.head.append(x); });
+  if (!window.jsQR) return toast(tt('Could not load the scanner. Check your connection.', 'ಸ್ಕ್ಯಾನರ್ ಲೋಡ್ ಆಗಲಿಲ್ಲ.'));
+  try { scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
+  catch (e) { return toast(tt('Allow camera access to scan the QR code.', 'QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಕ್ಯಾಮೆರಾ ಅನುಮತಿ ನೀಡಿ.')); }
+  const v = $('#scv'), c = document.createElement('canvas'), g = c.getContext('2d', { willReadFrequently: true });
+  v.srcObject = scanStream; await v.play().catch(() => {}); $('#scan').hidden = false;
+  const loop = () => {
+    if ($('#scan').hidden) return;
+    if (v.videoWidth) {
+      const k = Math.min(1, 640 / v.videoWidth); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k);
+      g.drawImage(v, 0, 0, c.width, c.height);
+      const r = jsQR(g.getImageData(0, 0, c.width, c.height).data, c.width, c.height), m = r && /[?&]link=([\w-]{10,40})(?:$|&)/.exec(r.data);
+      if (m) { stopScan(); return askLink(m[1]); }
+    }
+    scanTimer = setTimeout(loop, 150);
+  };
+  loop();
+}
+function askLink(code) {
+  socket.emit('qr:info', { code }, (r) => {
+    const gone = () => toast(tt('This QR code has expired. Show a new one on the computer.', 'ಈ QR ಕೋಡ್ ಅವಧಿ ಮುಗಿದಿದೆ. ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಹೊಸದನ್ನು ತೆರೆಯಿರಿ.'));
+    if (!r || !r.device) return gone();
+    const yes = el('button', 'pb', tt('Link device', 'ಸಾಧನ ಲಿಂಕ್ ಮಾಡಿ')), no = el('button', 'alt', tt('Cancel', 'ರದ್ದುಮಾಡಿ'));
+    yes.onclick = () => socket.emit('qr:approve', { code }, (a) => { $('#sh').hidden = true; if (a && a.ok) toast('✓ ' + tt('Device linked', 'ಸಾಧನ ಲಿಂಕ್ ಆಯಿತು')); else gone(); });
+    no.onclick = () => ($('#sh').hidden = true);
+    const dn = el('b', '', r.device); dn.style.fontSize = '1.1rem';
+    sheet(tt('Link this device?', 'ಈ ಸಾಧನ ಲಿಂಕ್ ಮಾಡಬೇಕೇ?'), dn,
+      el('p', 'note', tt('Only link a device you are using right now. It will be able to read and send your messages.', 'ನೀವು ಈಗ ಬಳಸುತ್ತಿರುವ ಸಾಧನವನ್ನು ಮಾತ್ರ ಲಿಂಕ್ ಮಾಡಿ. ಅದು ನಿಮ್ಮ ಸಂದೇಶಗಳನ್ನು ಓದಬಹುದು ಮತ್ತು ಕಳುಹಿಸಬಹುದು.')), yes, no);
+  });
+}
+function devices() {
+  socket.emit('devices', {}, (list) => {
+    const link = el('button', 'pb', tt('Link a device', 'ಸಾಧನ ಲಿಂಕ್ ಮಾಡಿ')); link.onclick = scanLink;
+    const rows = (list || []).map((d) => {
+      const r = el('div', 'row'), x = el('div', 't');
+      r.style.cursor = 'default';
+      x.append(el('b', '', d.device), el('span', 'pv', d.current ? tt('This device', 'ಈ ಸಾಧನ') : tt('Last active', 'ಕೊನೆಯ ಬಳಕೆ') + ' · ' + dayLabel(d.last) + ' ' + fmt(d.last)));
+      r.append(x);
+      if (!d.current) { const b = el('button', 'pb', tt('Log out', 'ಲಾಗ್ ಔಟ್')); b.style.padding = '.4rem .8rem'; b.onclick = () => socket.emit('device:revoke', { id: d.id }, devices); r.append(b); }
+      return r;
+    });
+    const all = el('button', 'alt', tt('Log out all other devices', 'ಉಳಿದ ಎಲ್ಲಾ ಸಾಧನಗಳಿಂದ ಲಾಗ್ ಔಟ್')); all.onclick = () => socket.emit('device:revoke_others', {}, devices);
+    sheet(tt('Linked devices', 'ಲಿಂಕ್ ಮಾಡಿದ ಸಾಧನಗಳು'),
+      el('p', 'note', tt('Use your chats on a computer or tablet: open the website there, choose “Sign in with QR code”, then tap Link a device and scan it. You can link as many devices as you like.', 'ಕಂಪ್ಯೂಟರ್ ಅಥವಾ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ವೆಬ್‌ಸೈಟ್ ತೆರೆಯಿರಿ, “QR ಕೋಡ್‌ನಿಂದ ಸೈನ್ ಇನ್ ಮಾಡಿ” ಆಯ್ಕೆಮಾಡಿ, ನಂತರ ಇಲ್ಲಿ “ಸಾಧನ ಲಿಂಕ್ ಮಾಡಿ” ಒತ್ತಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ. ಎಷ್ಟು ಸಾಧನಗಳನ್ನಾದರೂ ಲಿಂಕ್ ಮಾಡಬಹುದು.')),
+      link, ...rows, ...(rows.length > 1 ? [all] : []));
+  });
+}
 
 document.querySelectorAll('[data-ic]').forEach((e) => { setIc(e, e.dataset.ic); if (!e.getAttribute('aria-label')) e.setAttribute('aria-label', e.dataset.ic); });
 labels();
